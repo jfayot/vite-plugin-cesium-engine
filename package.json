@@ -1,0 +1,51 @@
+{
+  "name": "vite-plugin-cesium-engine",
+  "version": "0.0.1",
+  "description": "",
+  "author": "jfayot",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfayot/vite-plugin-cesium-engine.git"
+  },
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "cesium",
+    "@cesium/engine",
+    "esm"
+  ],
+  "homepage": "https://github.com/jfayot/vite-plugin-cesium-engine",
+  "bugs": "https://github.com/jfayot/vite-plugin-cesium-engine/issues",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/vite-plugin-cesium-engine.umd.cjs",
+  "module": "./dist/vite-plugin-cesium-engine.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/vite-plugin-cesium-engine.js",
+    "require": "./dist/vite-plugin-cesium-engine.umd.cjs"
+  },
+  "scripts": {
+    "demo:dev": "cd demo && pnpm dev",
+    "demo:build": "cd demo && pnpm build",
+    "demo:preview": "cd demo && pnpm preview",
+    "dev": "pnpm build && node ./scripts/buildDev.js && pnpm demo:dev",
+    "build": "tsc && vite build",
+    "release": "pnpm build && npm publish"
+  },
+  "dependencies": {
+    "vite-plugin-static-copy": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vite-plugin-dts": "^3.7.0"
+  }
+}
