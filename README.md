@@ -32,7 +32,7 @@ Ion.defaultAccessToken = "DON_T_FORGET_TO_PUT_YOUR_OWN_ION_TOKEN_HERE";
 
 const App: React.FC = () => {
   const viewerRef = React.useRef<HTMLDivElement>(null);
-  const [viewer, setViewer] = (React.useState<CesiumWidget|null>(null);
+  const [viewer, setViewer] = React.useState<CesiumWidget|null>(null);
 
   React.useEffect(() => {
     if (viewerRef.current && !viewer) {
