@@ -19,7 +19,7 @@ npm i -D @cesium/engine vite-plugin-cesium-engine
 
 No need to import CesiumWidget.css, no need to declare CESIUM_BASE_URL, the plugin does this for you.
 
-All you need to do is to provide the plugin to your vite config file:
+All you need to do is to insert the plugin in your vite config file:
 
 `vite.config.ts`
 
@@ -28,10 +28,12 @@ import { defineConfig } from "vite";
 import cesiumEngine from "vite-plugin-cesium-engine";
 
 export default defineConfig({
-  plugins: [cesiumEngine(
-    cesiumEngineVersion: "^6.2.0",
-    ionToken: "DONT_FORGET_TO_SET_YOUR_OWN_ION_ACCESS_TOKEN_HERE",
-  )],
+  plugins: [
+    cesiumEngine({
+      cesiumEngineVersion: "^6.2.0",
+      ionToken: "DONT_FORGET_TO_SET_YOUR_OWN_ION_ACCESS_TOKEN_HERE",
+    )},
+  ],
 });
 ```
 
@@ -44,7 +46,7 @@ import { CesiumWidget } from "@cesium/engine";
 
 const App: React.FC = () => {
   const viewerRef = React.useRef < HTMLDivElement > null;
-  const [viewer, setViewer] = (React.useState < CesiumWidget) | (null > null);
+  const [viewer, setViewer] = React.useState<CesiumWidget | null>(null);
 
   React.useEffect(() => {
     if (viewerRef.current && !viewer) {
