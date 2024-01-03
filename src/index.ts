@@ -7,24 +7,24 @@ export type PluginCesiumEngineOptions = {
    *
    * @default: "latest"
    */
-  cesiumEngineVersion: string;
+  cesiumEngineVersion?: string;
   /**
    * Defines the Cesium's Ion default access token
    *
-   * @default empty
+   * @default undefined
    */
-  ionToken: string;
+  ionToken?: string;
 };
 
 export default function pluginEntry(
-  pluginOptions?: Partial<PluginCesiumEngineOptions>
+  pluginOptions?: PluginCesiumEngineOptions
 ): Plugin[] {
   const options: PluginCesiumEngineOptions = {
     cesiumEngineVersion: pluginOptions?.cesiumEngineVersion ?? "latest",
-    ionToken: pluginOptions?.ionToken ?? "",
+    ionToken: pluginOptions?.ionToken,
   };
 
-  let ionTokenFile = "";
+  let ionTokenFile: string | undefined = undefined;
   let serving = false;
 
   return [
@@ -71,15 +71,17 @@ export default function pluginEntry(
         return userConfig;
       },
       generateBundle() {
-        const id = this.emitFile({
-          type: "asset",
-          name: "ionToken.js",
-          source: `
+        if (options.ionToken !== undefined) {
+          const id = this.emitFile({
+            type: "asset",
+            name: "ionToken.js",
+            source: `
 import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";
 Ion.defaultAccessToken = "${options.ionToken}";
-          `,
-        });
-        ionTokenFile = this.getFileName(id);
+            `,
+          });
+          ionTokenFile = this.getFileName(id);
+        }
       },
       transformIndexHtml() {
         const tags: HtmlTagDescriptor[] = [
@@ -90,28 +92,32 @@ Ion.defaultAccessToken = "${options.ionToken}";
               href: "/cesium/Widget/CesiumWidget.css",
             },
           },
-          {
-            tag: "script",
-            attrs: {
-              type: "module",
-              crossOriginIsolated: true,
-              src: ionTokenFile,
-            },
-          },
         ];
 
-        if (serving)
-          tags.push({
-            tag: "script",
-            attrs: {
-              type: "module",
-              crossOriginIsolated: true,
-            },
-            children: `
+        if (options.ionToken !== undefined) {
+          if (serving) {
+            tags.push({
+              tag: "script",
+              attrs: {
+                type: "module",
+                crossOriginIsolated: true,
+              },
+              children: `
 import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";
 Ion.defaultAccessToken = "${options.ionToken}";
-            `,
-          });
+              `,
+            });
+          } else {
+            tags.push({
+              tag: "script",
+              attrs: {
+                type: "module",
+                crossOriginIsolated: true,
+                src: ionTokenFile,
+              },
+            });
+          }
+        }
 
         return tags;
       },
