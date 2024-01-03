@@ -26,6 +26,7 @@ export default function pluginEntry(
 
   let ionTokenFile: string | undefined = undefined;
   let serving = false;
+  let baseUrl = "";
 
   return [
     ...viteStaticCopy({
@@ -46,19 +47,17 @@ export default function pluginEntry(
     }),
     {
       name: "cesium-config",
-      config(_config, env) {
+      config(config, env) {
         if (env.command === "serve") serving = true;
 
+        baseUrl = config.base ?? "";
+        console.log("config.base: " + config.base);
+        console.log("baseUrl: " + baseUrl);
+
         const userConfig: UserConfig = {
-          define: {
-            CESIUM_BASE_URL: JSON.stringify("/cesium/"),
-          },
           build: {
             rollupOptions: {
               external: ["http", "https", "url", "zlib"],
-              output: {
-                intro: `window.CESIUM_BASE_URL = "/cesium/";`,
-              },
             },
           },
           resolve: {
@@ -75,10 +74,7 @@ export default function pluginEntry(
           const id = this.emitFile({
             type: "asset",
             name: "ionToken.js",
-            source: `
-import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";
-Ion.defaultAccessToken = "${options.ionToken}";
-            `,
+            source: `import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";Ion.defaultAccessToken = "${options.ionToken}";`,
           });
           ionTokenFile = this.getFileName(id);
         }
@@ -86,10 +82,18 @@ Ion.defaultAccessToken = "${options.ionToken}";
       transformIndexHtml() {
         const tags: HtmlTagDescriptor[] = [
           {
+            tag: "script",
+            attrs: {
+              type: "module",
+              crossOriginIsolated: true,
+            },
+            children: `window.CESIUM_BASE_URL = "${baseUrl}/cesium/";`,
+          },
+          {
             tag: "link",
             attrs: {
               rel: "stylesheet",
-              href: "/cesium/Widget/CesiumWidget.css",
+              href: `${baseUrl}/cesium/Widget/CesiumWidget.css`,
             },
           },
         ];
@@ -102,10 +106,7 @@ Ion.defaultAccessToken = "${options.ionToken}";
                 type: "module",
                 crossOriginIsolated: true,
               },
-              children: `
-import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";
-Ion.defaultAccessToken = "${options.ionToken}";
-              `,
+              children: `import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";Ion.defaultAccessToken = "${options.ionToken}";`,
             });
           } else {
             tags.push({

@@ -77,6 +77,6 @@ Semver version of @cesium/engine to import from [ESM.sh](esm.sh)
 ### ionToken
 
 - **Type :** `string`
-- **Default :** `empty`
+- **Default :** `undefined`
 
 Defines the Cesium's Ion access token

@@ -1,23 +1,23 @@
 import React from "react";
-import { CesiumWidget } from "@cesium/engine";
+import Viewer3D from "./viewer3D";
 import styles from "./App.module.css";
 
 const App: React.FC = () => {
-  const viewerRef = React.useRef<HTMLDivElement>(null);
-  const [viewer, setViewer] = React.useState<CesiumWidget | null>(null);
+  const divRef = React.useRef<HTMLDivElement>(null);
+  const [viewer, setViewer] = React.useState<Viewer3D | null>(null);
 
   React.useEffect(() => {
-    if (viewerRef.current && !viewer) {
-      setViewer(new CesiumWidget(viewerRef.current));
+    if (divRef.current) {
+      setViewer(new Viewer3D(divRef.current));
     }
 
     return () => {
       viewer?.destroy();
       setViewer(null);
     };
-  }, [viewerRef]);
+  }, [divRef]);
 
-  return <div className={styles.container} ref={viewerRef} />;
+  return <div className={styles.container} ref={divRef} />;
 };
 
 export default App;
