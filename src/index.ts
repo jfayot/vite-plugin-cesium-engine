@@ -1,7 +1,32 @@
-import type { Plugin, UserConfig } from "vite";
+import type { Plugin, UserConfig, HtmlTagDescriptor } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
-export default function pluginEntry(): Plugin[] {
+export type PluginCesiumEngineOptions = {
+  /**
+   * Defines the @cesium/engine semver to import
+   *
+   * @default: "latest"
+   */
+  cesiumEngineVersion: string;
+  /**
+   * Defines the Cesium's Ion default access token
+   *
+   * @default empty
+   */
+  ionToken: string;
+};
+
+export default function pluginEntry(
+  pluginOptions?: Partial<PluginCesiumEngineOptions>
+): Plugin[] {
+  const options: PluginCesiumEngineOptions = {
+    cesiumEngineVersion: pluginOptions?.cesiumEngineVersion ?? "latest",
+    ionToken: pluginOptions?.ionToken ?? "",
+  };
+
+  let ionTokenFile = "";
+  let serving = false;
+
   return [
     ...viteStaticCopy({
       targets: [
@@ -21,16 +46,9 @@ export default function pluginEntry(): Plugin[] {
     }),
     {
       name: "cesium-config",
-      transformIndexHtml: () => [
-        {
-          tag: "link",
-          attrs: {
-            rel: "stylesheet",
-            href: "/cesium/Widget/CesiumWidget.css",
-          },
-        },
-      ],
-      config: () => {
+      config(_config, env) {
+        if (env.command === "serve") serving = true;
+
         const userConfig: UserConfig = {
           define: {
             CESIUM_BASE_URL: JSON.stringify("/cesium/"),
@@ -45,12 +63,57 @@ export default function pluginEntry(): Plugin[] {
           },
           resolve: {
             alias: {
-              "@cesium/engine": "https://esm.sh/@cesium/engine",
+              "@cesium/engine": `https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}`,
             },
           },
         };
 
         return userConfig;
+      },
+      generateBundle() {
+        const id = this.emitFile({
+          type: "asset",
+          name: "ionToken.js",
+          source: `
+import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";
+Ion.defaultAccessToken = "${options.ionToken}";
+          `,
+        });
+        ionTokenFile = this.getFileName(id);
+      },
+      transformIndexHtml() {
+        const tags: HtmlTagDescriptor[] = [
+          {
+            tag: "link",
+            attrs: {
+              rel: "stylesheet",
+              href: "/cesium/Widget/CesiumWidget.css",
+            },
+          },
+          {
+            tag: "script",
+            attrs: {
+              type: "module",
+              crossOriginIsolated: true,
+              src: ionTokenFile,
+            },
+          },
+        ];
+
+        if (serving)
+          tags.push({
+            tag: "script",
+            attrs: {
+              type: "module",
+              crossOriginIsolated: true,
+            },
+            children: `
+import { Ion } from "https://esm.sh/@cesium/engine@${options.cesiumEngineVersion}";
+Ion.defaultAccessToken = "${options.ionToken}";
+            `,
+          });
+
+        return tags;
       },
     },
   ];

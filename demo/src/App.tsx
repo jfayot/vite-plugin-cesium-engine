@@ -1,7 +1,6 @@
 import React from "react";
-import { CesiumWidget, Ion } from "@cesium/engine";
-
-Ion.defaultAccessToken = "YOUR_OWN_ION_TOKEN";
+import { CesiumWidget } from "@cesium/engine";
+import styles from "./App.module.css";
 
 const App: React.FC = () => {
   const viewerRef = React.useRef<HTMLDivElement>(null);
@@ -18,7 +17,7 @@ const App: React.FC = () => {
     };
   }, [viewerRef]);
 
-  return <div style={{ width: "100%", height: "100%" }} ref={viewerRef} />;
+  return <div className={styles.container} ref={viewerRef} />;
 };
 
 export default App;
