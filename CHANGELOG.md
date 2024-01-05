@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.1.0
+
+### Minor Changes
+
+- Got rid of esm.sh
+
 ## 1.0.3
 
 ### Patch Changes

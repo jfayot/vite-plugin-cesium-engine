@@ -1,12 +1,10 @@
 # vite-plugin-cesium-engine
 
-[![npm](https://img.shields.io/npm/v/vite-plugin-cesium-engine.svg)](https://www.npmjs.com/package/vite-plugin-cesium-engine)
-
 Yet another Vite.js plugin for Cesium.js !
 
-Inspired from [vite-plugin-cesium](https://github.com/nshen/vite-plugin-cesium/) and [vite-plugin-cesium-build](https://github.com/s3xysteak/vite-plugin-cesium-build) this one aims at providing a plug-and-play plugin for the [@cesium/engine](https://www.npmjs.com/package/@cesium/engine) package **only**: no widget at all, except the mandatory [CesiumWidget](https://cesium.com/learn/cesiumjs/ref-doc/CesiumWidget.html)
+[![npm](https://img.shields.io/npm/v/vite-plugin-cesium-engine.svg)](https://www.npmjs.com/package/vite-plugin-cesium-engine)
 
-It relies on [esm.sh](https://esm.sh) modern CDN to import cesium's engine as ES6+ module.
+Inspired from [vite-plugin-cesium](https://github.com/nshen/vite-plugin-cesium/) and [vite-plugin-cesium-build](https://github.com/s3xysteak/vite-plugin-cesium-build) this one aims at providing a plug-and-play plugin for the [@cesium/engine](https://www.npmjs.com/package/@cesium/engine) package **only**: no widget at all, except the mandatory [CesiumWidget](https://cesium.com/learn/cesiumjs/ref-doc/CesiumWidget.html)
 
 ## Install
 
@@ -30,7 +28,7 @@ import cesiumEngine from "vite-plugin-cesium-engine";
 export default defineConfig({
   plugins: [
     cesiumEngine({
-      cesiumEngineVersion: "^6.2.0",
+      // Optional
       ionToken: "DONT_FORGET_TO_SET_YOUR_OWN_ION_ACCESS_TOKEN_HERE",
     )},
   ],
@@ -67,16 +65,10 @@ export default App;
 
 ## Plugin options
 
-### cesiumEngineVersion
-
-- **Type :** `string`
-- **Default :** `latest`
-
-Semver version of @cesium/engine to import from [ESM.sh](esm.sh)
-
 ### ionToken
 
 - **Type :** `string`
-- **Default :** `undefined`
+- **Optional**
+- **Default :** `undefined` The Cesium's default Ion Access token will be used
 
 Defines the Cesium's Ion access token
