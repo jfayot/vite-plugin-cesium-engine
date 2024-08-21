@@ -10,6 +10,7 @@ import {
   ModelGraphics,
 } from "@cesium/engine";
 import rafale from "./resources/Rafale.glb?url";
+import sa17 from "./resources/SA-17.glb?url";
 
 export default class Viewer3D {
   private _widget: CesiumWidget;
@@ -28,11 +29,18 @@ export default class Viewer3D {
       dataSourceCollection: dataSourceCollection,
     });
     const entities = this._dataSourceDisplay.defaultDataSource.entities;
-    const position = Cartesian3.fromDegrees(2, 45, 2000);
-    const entity = entities.add({
-      position: position,
+    const rafaleEntity = entities.add({
+      position: Cartesian3.fromDegrees(2, 45, 100),
       model: new ModelGraphics({
         uri: rafale,
+        minimumPixelSize: 64,
+      }),
+    });
+
+    entities.add({
+      position: Cartesian3.fromDegrees(2, 45, 0),
+      model: new ModelGraphics({
+        uri: sa17,
         minimumPixelSize: 64,
       }),
     });
@@ -46,7 +54,7 @@ export default class Viewer3D {
       if (!this._flyDone) {
         const boundingSphere = new BoundingSphere();
         const trackedState = this._dataSourceDisplay?.getBoundingSphere(
-          entity,
+          rafaleEntity,
           false,
           boundingSphere
         );

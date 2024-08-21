@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.1.1
+
+### Patch Changes
+
+- Added wasm files for draco compressed models
+
 ## 1.1.0
 
 ### Minor Changes

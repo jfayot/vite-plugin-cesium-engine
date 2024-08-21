@@ -32,6 +32,10 @@ export default function pluginEntry(
           src: "./node_modules/@cesium/engine/Source/Widget/*.css",
           dest: "./cesium/Widget/",
         },
+        {
+          src: "./node_modules/@cesium/engine/Source/ThirdParty/*.wasm",
+          dest: "./cesium/ThirdParty/",
+        },
       ],
     }),
     {
