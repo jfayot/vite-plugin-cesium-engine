@@ -47,11 +47,10 @@ export default function pluginEntry(
           build: {
             rollupOptions: {
               output: {
-                manualChunks: {
-                  cesium: ["@cesium/engine"],
+                manualChunks: (id) => {
+                  if (id.includes("@cesium/engine")) return "cesium_engine";
                 },
               },
-              external: ["http", "https", "url", "zlib"],
             },
           },
         };

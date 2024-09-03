@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.1.2
+
+### Patch Changes
+
+- Changed cesium's manual chunk to callable for some frameworks (e.g. Vike)"
+
 ## 1.1.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-cesium-engine",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "",
   "author": "jfayot",
   "type": "module",
@@ -34,7 +34,7 @@
   },
   "scripts": {
     "demo:dev": "cd demo && pnpm dev",
-    "demo:build": "cd demo && pnpm build",
+    "demo:build": "pnpm build && node ./scripts/buildDev.js && cd demo && pnpm build",
     "demo:preview": "cd demo && pnpm preview",
     "dev": "pnpm build && node ./scripts/buildDev.js && pnpm demo:dev",
     "build": "tsc && vite build",
