@@ -1,4 +1,4 @@
-import type { Plugin, UserConfig } from "vite";
+import type { Plugin } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
 export type PluginCesiumEngineOptions = {
@@ -42,20 +42,6 @@ export default function pluginEntry(
       name: "cesium-config",
       config(config) {
         baseUrl = config.base ?? "";
-
-        const userConfig: UserConfig = {
-          build: {
-            rollupOptions: {
-              output: {
-                manualChunks: (id) => {
-                  if (id.includes("@cesium/engine")) return "cesium_engine";
-                },
-              },
-            },
-          },
-        };
-
-        return userConfig;
       },
       transform(code, module) {
         if (ionToken !== undefined) {

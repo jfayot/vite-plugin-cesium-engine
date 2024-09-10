@@ -2,12 +2,15 @@ import {
   BoundingSphere,
   BoundingSphereState,
   Cartesian3,
+  Cartographic,
   CesiumWidget,
   DataSourceCollection,
   DataSourceDisplay,
   Event,
   JulianDate,
   ModelGraphics,
+  sampleTerrainMostDetailed,
+  Terrain,
 } from "@cesium/engine";
 import rafale from "./resources/Rafale.glb?url";
 import sa17 from "./resources/SA-17.glb?url";
@@ -20,7 +23,12 @@ export default class Viewer3D {
   private _flyDone: boolean;
 
   constructor(cesiumRoot: HTMLDivElement) {
-    this._widget = new CesiumWidget(cesiumRoot);
+    this._widget = new CesiumWidget(cesiumRoot, {
+      terrain: Terrain.fromWorldTerrain({
+        requestWaterMask: true,
+        requestVertexNormals: true,
+      }),
+    });
     const scene = this._widget.scene;
     const camera = this._widget.camera;
     const dataSourceCollection = new DataSourceCollection();
@@ -30,20 +38,33 @@ export default class Viewer3D {
     });
     const entities = this._dataSourceDisplay.defaultDataSource.entities;
     const rafaleEntity = entities.add({
-      position: Cartesian3.fromDegrees(2, 45, 100),
+      position: Cartesian3.fromDegrees(2, 45, 1000),
       model: new ModelGraphics({
         uri: rafale,
         minimumPixelSize: 64,
       }),
     });
 
-    entities.add({
-      position: Cartesian3.fromDegrees(2, 45, 0),
-      model: new ModelGraphics({
-        uri: sa17,
-        minimumPixelSize: 64,
-      }),
+    const terrain = Terrain.fromWorldTerrain({
+      requestWaterMask: true,
+      requestVertexNormals: true,
     });
+    this._widget.scene.setTerrain(terrain);
+    
+    terrain.readyEvent.addEventListener((provider)=>{
+      sampleTerrainMostDetailed(provider, [Cartographic.fromDegrees(2, 45, 0)])
+        .then((cartographics) => {
+          entities.add({
+            position: Cartographic.toCartesian(cartographics[0]),
+            model: new ModelGraphics({
+              uri: sa17,
+              minimumPixelSize: 64,
+            }),
+          });
+        })
+        .catch((error) => console.log(error));
+    })
+
 
     this._removeTickCb = this._widget.clock.onTick.addEventListener((clock) =>
       this._tickHandler(clock.currentTime)

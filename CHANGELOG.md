@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.1.3
+
+### Patch Changes
+
+- Let the plugin consumer decide its manual chunk strategy
+
 ## 1.1.2
 
 ### Patch Changes
