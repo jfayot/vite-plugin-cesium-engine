@@ -20,5 +20,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Build
         uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - run: pnpm i
       - run: pnpm build
