@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.1.7
+
+### Patch Changes
+
+- Fixed package manager
+
 ## 1.1.6
 
 ### Patch Changes
