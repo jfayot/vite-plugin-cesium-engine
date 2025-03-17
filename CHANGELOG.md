@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.1.6
+
+### Patch Changes
+
+- Updated dependencies
+
 ## 1.1.5
 
 ### Patch Changes
