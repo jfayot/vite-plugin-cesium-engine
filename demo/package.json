@@ -23,7 +23,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1",
-    "vite": "^6.2.2",
+    "vite": "^6.2.3",
     "vite-plugin-cesium-engine": "^1.1.7"
   }
 }
