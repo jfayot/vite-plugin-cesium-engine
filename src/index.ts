@@ -21,6 +21,10 @@ export default function pluginEntry(
     ...viteStaticCopy({
       targets: [
         {
+          src: "./node_modules/@cesium/engine/Source/ThirdParty/*.wasm",
+          dest: "./cesium/ThirdParty/",
+        },
+        {
           src: "./node_modules/@cesium/engine/Build/*",
           dest: "./cesium/",
         },
@@ -31,10 +35,6 @@ export default function pluginEntry(
         {
           src: "./node_modules/@cesium/engine/Source/Widget/*.css",
           dest: "./cesium/Widget/",
-        },
-        {
-          src: "./node_modules/@cesium/engine/Source/ThirdParty/*.wasm",
-          dest: "./cesium/ThirdParty/",
         },
       ],
     }),

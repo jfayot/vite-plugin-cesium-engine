@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.1.8
+
+### Patch Changes
+
+- Inverted vite static copy targets to workaround https://github.com/sapphi-red/vite-plugin-static-copy/issues/151
+
 ## 1.1.7
 
 ### Patch Changes
