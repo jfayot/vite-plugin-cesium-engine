@@ -41,7 +41,7 @@
     "release": "pnpm build && npm publish"
   },
   "dependencies": {
-    "vite-plugin-static-copy": "^2.3.0"
+    "vite-plugin-static-copy": "^3.0.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
