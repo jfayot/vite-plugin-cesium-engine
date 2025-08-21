@@ -1810,11 +1810,11 @@ packages:
   vite-plugin-cesium-engine@1.1.8:
     resolution: {integrity: sha512-YiGUvzf9+PGr3SIE2lQa330IkLYjqjHjWnxc69UZ789kTJaQQAVtyqwR9aD6+sCLxMEdd86aqKWlTW7g3/bS/g==}
 
-  vite-plugin-static-copy@3.0.0:
-    resolution: {integrity: sha512-Uki9pPUQ4ZnoMEdIFabvoh9h6Bh9Q1m3iF7BrZvoiF30reREpJh2gZb4jOnW1/uYFzyRiLCmFSkM+8hwiq1vWQ==}
+  vite-plugin-static-copy@3.1.2:
+    resolution: {integrity: sha512-aVmYOzptLVOI2b1jL+cmkF7O6uhRv1u5fvOkQgbohWZp2CbR22kn9ZqkCUIt9umKF7UhdbsEpshn1rf4720QFg==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
-      vite: ^5.0.0 || ^6.0.0
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0
 
   vite@6.3.5:
     resolution: {integrity: sha512-cZn6NDFE7wdTpINgs++ZJ4N49W2vRp8LCKrn3Ob1kYNtOo21vfDoaV5GzBfLU4MovSAB8uNRm4jgzVQZ+mBzPQ==}
@@ -3906,11 +3906,11 @@ snapshots:
 
   vite-plugin-cesium-engine@1.1.8(vite@6.3.5(@types/node@22.15.17)):
     dependencies:
-      vite-plugin-static-copy: 3.0.0(vite@6.3.5(@types/node@22.15.17))
+      vite-plugin-static-copy: 3.1.2(vite@6.3.5(@types/node@22.15.17))
     transitivePeerDependencies:
       - vite
 
-  vite-plugin-static-copy@3.0.0(vite@6.3.5(@types/node@22.15.17)):
+  vite-plugin-static-copy@3.1.2(vite@6.3.5(@types/node@22.15.17)):
     dependencies:
       chokidar: 3.6.0
       fs-extra: 11.3.0
