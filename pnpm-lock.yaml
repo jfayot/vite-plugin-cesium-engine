@@ -10,7 +10,7 @@ importers:
     dependencies:
       vite-plugin-static-copy:
         specifier: ^3.1.2
-        version: 3.1.4(vite@7.3.1)
+        version: 3.1.6(vite@7.3.1)
     devDependencies:
       '@changesets/cli':
         specifier: ^2.29.6
@@ -863,8 +863,8 @@ packages:
     resolution: {integrity: sha512-y3b8Kpd8OAN444hxfBbFfj1FY/RjtTd8tzYwhUqNYXx0fXx2iX4maP4Qr6qhIKbQXI02wTLAda4fYUbDagTUFw==}
     engines: {node: '>=6'}
 
-  p-map@7.0.3:
-    resolution: {integrity: sha512-VkndIv2fIB99swvQoA65bm+fsmt6UNdGeIB0oxBs+WhAhdh08QA04JXpI7rbB9r08/nkbysKoya9rtDERYOYMA==}
+  p-map@7.0.4:
+    resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
     engines: {node: '>=18'}
 
   p-try@2.2.0:
@@ -1080,8 +1080,8 @@ packages:
       vite:
         optional: true
 
-  vite-plugin-static-copy@3.1.4:
-    resolution: {integrity: sha512-iCmr4GSw4eSnaB+G8zc2f4dxSuDjbkjwpuBLLGvQYR9IW7rnDzftnUjOH5p4RYR+d4GsiBqXRvzuFhs5bnzVyw==}
+  vite-plugin-static-copy@3.1.6:
+    resolution: {integrity: sha512-dO8Qc71yVCmcrsKrJRgSWmWj9khI7X8fLy8X35/ZFR+Nik8CQ1uUgK7iD2KQc2AQdG51sNegSj8Tb4mDKeNYZA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0
@@ -1961,7 +1961,7 @@ snapshots:
 
   p-map@2.1.0: {}
 
-  p-map@7.0.3: {}
+  p-map@7.0.4: {}
 
   p-try@2.2.0: {}
 
@@ -2162,10 +2162,10 @@ snapshots:
       - rollup
       - supports-color
 
-  vite-plugin-static-copy@3.1.4(vite@7.3.1):
+  vite-plugin-static-copy@3.1.6(vite@7.3.1):
     dependencies:
       chokidar: 3.6.0
-      p-map: 7.0.3
+      p-map: 7.0.4
       picocolors: 1.1.1
       tinyglobby: 0.2.15
       vite: 7.3.1
