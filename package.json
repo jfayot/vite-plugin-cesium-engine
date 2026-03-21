@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-cesium-engine",
-  "version": "1.1.9",
-  "description": "",
+  "version": "1.2.0",
+  "description": "Zero-config Vite plugin for @cesium/engine — handles assets, CESIUM_BASE_URL, and Ion token automatically.",
   "author": "jfayot",
   "type": "module",
   "repository": {
@@ -13,7 +13,10 @@
     "vite-plugin",
     "cesium",
     "@cesium/engine",
-    "esm"
+    "esm",
+    "3d",
+    "globe",
+    "geospatial"
   ],
   "homepage": "https://github.com/jfayot/vite-plugin-cesium-engine",
   "bugs": "https://github.com/jfayot/vite-plugin-cesium-engine/issues",
@@ -22,31 +25,44 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
-    "dist"
+    "dist",
+    "virtual.d.ts"
   ],
   "main": "./dist/vite-plugin-cesium-engine.umd.cjs",
   "module": "./dist/vite-plugin-cesium-engine.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/vite-plugin-cesium-engine.js",
-    "require": "./dist/vite-plugin-cesium-engine.umd.cjs"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vite-plugin-cesium-engine.js",
+      "require": "./dist/vite-plugin-cesium-engine.umd.cjs"
+    },
+    "./virtual": {
+      "types": "./virtual.d.ts"
+    }
   },
   "scripts": {
-    "demo:dev": "cd demo && pnpm dev",
-    "demo:build": "pnpm build && node ./scripts/buildDev.js && cd demo && pnpm install && pnpm build",
-    "demo:preview": "cd demo && pnpm preview",
-    "dev": "pnpm build && node ./scripts/buildDev.js && pnpm demo:dev",
-    "build": "tsc && vite build",
+    "dev": "pnpm build",
+    "build": "vite build",
     "release": "pnpm build && npm publish"
+  },
+  "peerDependencies": {
+    "@cesium/engine": ">=11.0.0",
+    "vite": ">=5.0.0"
   },
   "dependencies": {
     "vite-plugin-static-copy": "^3.1.2"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.6",
+    "@types/node": "^25.5.0",
     "typescript": "^5.9.2",
-    "vite": "^7.1.5",
+    "vite": "^8.0.1",
     "vite-plugin-dts": "^4.5.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite-plugin-dts>@microsoft/api-extractor": "7.56.3"
+    }
   }
 }

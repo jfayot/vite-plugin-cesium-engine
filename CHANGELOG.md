@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.2.0
+
+### Minor Changes
+
+- Added cesiumBaseUrl, assetsPath and debug options
+
 ## 1.1.9
 
 ### Patch Changes
