@@ -1,0 +1,21 @@
+{
+  "name": "cesium-engine-svelte-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@cesium/engine": "^23.0.1",
+    "svelte": "^5.54.1"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.1",
+    "vite-plugin-cesium-engine": "^1.2.1"
+  }
+}

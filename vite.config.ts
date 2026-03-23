@@ -14,7 +14,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // Vite and its peers are provided by the consumer — never bundle them.
-      external: ["vite", "vite-plugin-static-copy", "node:fs", "node:path"],
+      external: ["vite", "node:fs", "node:path"],
     },
   },
 });

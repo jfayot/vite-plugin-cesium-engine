@@ -189,92 +189,43 @@ Output at dev-server startup:
 
 ---
 
-## Framework examples
+## Examples
 
-<details>
-<summary><strong>React</strong></summary>
+Complete, ready-to-run starter projects are available in the [`examples/`](./examples) directory:
 
-```tsx
-// App.tsx
-import { useEffect, useRef } from "react";
-import { CesiumWidget } from "@cesium/engine";
+| Example | Stack | Description |
+|---|---|---|
+| [`examples/react`](./examples/react) | React 19 + TypeScript | `useEffect` lifecycle, HMR-safe widget init |
+| [`examples/vue`](./examples/vue) | Vue 3 + TypeScript | Composition API, `onMounted` / `onBeforeUnmount` |
+| [`examples/svelte`](./examples/svelte) | Svelte 5 + TypeScript | `onMount` with return-value cleanup |
+| [`examples/vanilla`](./examples/vanilla) | Vanilla TypeScript | Zero framework, `import.meta.hot` HMR cleanup |
 
-export default function App() {
-  const containerRef = useRef<HTMLDivElement>(null);
+Each example includes all project files and can be run with:
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const widget = new CesiumWidget(containerRef.current);
-    return () => widget.destroy();
-  }, []);
-
-  return <div ref={containerRef} style={{ width: "100%", height: "100vh" }} />;
-}
+```bash
+cd examples/react   # or vue / svelte / vanilla
+pnpm install
+pnpm dev
 ```
 
-</details>
+---
 
-<details>
-<summary><strong>Vue</strong></summary>
+## Known warnings
 
-```vue
-<!-- CesiumMap.vue -->
-<script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from "vue";
-import { CesiumWidget } from "@cesium/engine";
+### `[EVAL] Use of direct eval function is strongly discouraged`
 
-const container = ref<HTMLDivElement>();
-let widget: CesiumWidget;
-
-onMounted(() => {
-  widget = new CesiumWidget(container.value!);
-});
-
-onBeforeUnmount(() => {
-  widget?.destroy();
-});
-</script>
-
-<template>
-  <div ref="container" style="width: 100%; height: 100vh" />
-</template>
-```
-
-</details>
-
-<details>
-<summary><strong>Svelte</strong></summary>
-
-```svelte
-<!-- CesiumMap.svelte -->
-<script lang="ts">
-  import { onMount } from "svelte";
-  import { CesiumWidget } from "@cesium/engine";
-
-  let container: HTMLDivElement;
-
-  onMount(() => {
-    const widget = new CesiumWidget(container);
-    return () => widget.destroy();
-  });
-</script>
-
-<div bind:this={container} style="width: 100%; height: 100vh" />
-```
-
-</details>
-
-<details>
-<summary><strong>Vanilla TS</strong></summary>
+This comes from `protobufjs`, a transitive dependency of `@cesium/engine`. The eval is intentional in that library (used for optional `require()` resolution) and is not a security risk in practice. Suppress it in your app's `vite.config.ts`:
 
 ```ts
-// main.ts
-import { CesiumWidget } from "@cesium/engine";
-
-const widget = new CesiumWidget(document.getElementById("app")!);
+build: {
+  rollupOptions: {
+    onwarn(warning, defaultHandler) {
+      if (warning.code === "EVAL" && warning.id?.includes("protobufjs")) return;
+      defaultHandler(warning);
+    },
+  },
+},
 ```
-
-</details>
 
 ---
 
