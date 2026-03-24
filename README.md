@@ -83,7 +83,7 @@ cesiumEngine({
 ```
 
 | Option | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `ionToken` | `string \| Record<string, string>` | `undefined` | Ion access token. Use a plain string for all environments, or a `{ [mode]: token }` map for per-environment tokens. |
 | `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL path from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
@@ -103,7 +103,7 @@ cesiumEngine({
     development: process.env.CESIUM_ION_TOKEN_DEV,
     staging:     process.env.CESIUM_ION_TOKEN_STAGING,
     production:  process.env.CESIUM_ION_TOKEN_PROD,
-    // Optional fallback for any unrecognised mode:
+    // Optional fallback for any unrecognized mode:
     default:     process.env.CESIUM_ION_TOKEN_DEV,
   },
 })
@@ -174,7 +174,7 @@ cesiumEngine({ debug: true })
 
 Output at dev-server startup:
 
-```
+```console
 [cesium-engine] mode         : development
 [cesium-engine] vite base    : ""
 [cesium-engine] cesiumBaseUrl: "/cesium"
@@ -194,7 +194,7 @@ Output at dev-server startup:
 Complete, ready-to-run starter projects are available in the [`examples/`](./examples) directory:
 
 | Example | Stack | Description |
-|---|---|---|
+| --- | --- | --- |
 | [`examples/react`](./examples/react) | React 19 + TypeScript | `useEffect` lifecycle, HMR-safe widget init |
 | [`examples/vue`](./examples/vue) | Vue 3 + TypeScript | Composition API, `onMounted` / `onBeforeUnmount` |
 | [`examples/svelte`](./examples/svelte) | Svelte 5 + TypeScript | `onMount` with return-value cleanup |

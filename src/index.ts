@@ -78,16 +78,18 @@ export type CesiumEngineOptions = {
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
-// Match the Ion module in all three forms its ID can take:
+// Detect the Ion module by plain substring checks. The ID can take three forms:
 //
 //   dev   (absolute path) : /…/node_modules/@cesium/engine/Source/Core/Ion.js
 //   build (bare source)   : @cesium/engine/Source/Core/Ion.js
-//   build (bundled)       : …cesium_engine….js
-//
-// Keying on the path segment rather than the package prefix makes it work
-// with absolute IDs that Vite produces during `vite serve`.
-const ION_MODULE_RE =
-  /([/\\]@cesium[/\\]engine[/\\]Source[/\\]Core[/\\]Ion\.js|@cesium\/engine\/Source\/Core\/Ion\.js|[^/]*cesium_engine[^/]*\.js)/;
+//   build (bundled)       : …@cesium_engine.js…
+function isIonModule(id: string): boolean {
+  return (
+    id.includes("@cesium/engine/Source/Core/Ion.js") ||
+    id.includes("@cesium\\engine\\Source\\Core\\Ion.js") ||
+    id.includes("@cesium_engine.js")
+  );
+}
 
 // Cesium Ion tokens are JWTs — a rough but useful sanity check.
 const ION_TOKEN_RE = /^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
@@ -333,8 +335,8 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
 
     // ── Ion token injection ───────────────────────────────────────────────
     transform(code, id) {
+      if (!isIonModule(id)) return undefined;
       if (activeToken === undefined) return undefined;
-      if (!ION_MODULE_RE.test(id)) return undefined;
 
       const patched = code.replace(
         /Ion\.defaultAccessToken = defaultAccessToken(\$1)?/,

@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.2.2
+
+### Patch Changes
+
+- Fixed gh security alert
+
 ## 1.2.1
 
 ### Patch Changes
