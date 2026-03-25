@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-cesium-engine",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Zero-config Vite plugin for @cesium/engine — handles assets, CESIUM_BASE_URL, and Ion token automatically.",
   "author": "jfayot",
   "type": "module",
@@ -13,10 +13,7 @@
     "vite-plugin",
     "cesium",
     "@cesium/engine",
-    "esm",
-    "3d",
-    "globe",
-    "geospatial"
+    "3d"
   ],
   "homepage": "https://github.com/jfayot/vite-plugin-cesium-engine",
   "bugs": "https://github.com/jfayot/vite-plugin-cesium-engine/issues",
@@ -30,10 +27,10 @@
   ],
   "main": "./dist/vite-plugin-cesium-engine.umd.cjs",
   "module": "./dist/vite-plugin-cesium-engine.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/src/index.d.ts",
       "import": "./dist/vite-plugin-cesium-engine.js",
       "require": "./dist/vite-plugin-cesium-engine.umd.cjs"
     },

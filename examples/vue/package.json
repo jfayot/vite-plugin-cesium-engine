@@ -16,7 +16,7 @@
     "@vitejs/plugin-vue": "^6.0.5",
     "typescript": "^6.0.2",
     "vite": "^8.0.2",
-    "vite-plugin-cesium-engine": "^1.2.2",
+    "vite-plugin-cesium-engine": "^1.2.3",
     "vue-tsc": "^3.2.6"
   }
 }

@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.2.3
+
+### Patch Changes
+
+- Fixed type def path
+
 ## 1.2.2
 
 ### Patch Changes
