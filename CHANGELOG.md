@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.2.4
+
+### Patch Changes
+
+- PR #122 from @etuardu: Fixed typo in README
+
 ## 1.2.3
 
 ### Patch Changes
