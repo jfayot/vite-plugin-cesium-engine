@@ -11,7 +11,7 @@ Handles static assets, `CESIUM_BASE_URL`, widget CSS, and your Ion token — not
 
 ## Why this plugin?
 
-Other Cesium Vite plugins target the full `cesium` / `@cesium/widgets` package.  
+Other Cesium Vite plugins target the full `cesium` package.  
 This one is purpose-built for **`@cesium/engine` only** — the lean, widget-free core — so your bundle stays small and you stay in control of the UI.
 
 What it does for you automatically:
