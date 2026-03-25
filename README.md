@@ -47,7 +47,7 @@ Add the plugin to your Vite config — that's it.
 ```ts
 // vite.config.ts
 import { defineConfig } from "vite";
-import cesiumEngine from "vite-plugin-cesium-engine";
+import { cesiumEngine } from "vite-plugin-cesium-engine";
 
 export default defineConfig({
   plugins: [cesiumEngine()],
