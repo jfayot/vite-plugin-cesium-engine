@@ -41,7 +41,8 @@
   "scripts": {
     "dev": "pnpm build",
     "build": "vite build",
-    "release": "pnpm build && npm publish"
+    "release": "pnpm build && npm publish",
+    "ci:publish": "pnpm build && changeset publish"
   },
   "peerDependencies": {
     "@cesium/engine": ">=11.0.0",
