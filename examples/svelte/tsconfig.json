@@ -9,7 +9,8 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "noEmit": true,
-    "strict": true
+    "strict": true,
+    "types": ["vite-plugin-cesium-engine/virtual"]
   },
   "include": ["src/**/*.ts", "src/**/*.svelte"]
 }

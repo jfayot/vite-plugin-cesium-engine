@@ -1,4 +1,7 @@
 import { CesiumWidget, Terrain } from "@cesium/engine";
+import { CESIUM_VERSION } from "virtual:cesium/version";
+
+console.log(CESIUM_VERSION);
 
 const widget = new CesiumWidget(document.getElementById("app")!, {
   terrain: Terrain.fromWorldTerrain(),
