@@ -4,6 +4,7 @@ import {
   mkdirSync,
   readdirSync,
   copyFileSync,
+  readFileSync,
 } from "node:fs";
 import { resolve, join } from "node:path";
 import type { Plugin, ResolvedConfig } from "vite";
@@ -195,10 +196,13 @@ function copyCesiumAssets(
   }
 }
 
-// ─── Virtual module: `virtual:cesium` ────────────────────────────────────────
+// ─── Virtual modules ──────────────────────────────────────────────────────────
 
-const VIRTUAL_MODULE_ID = "virtual:cesium";
-const RESOLVED_VIRTUAL_ID = "\0virtual:cesium";
+const VIRTUAL_CESIUM_ID = "virtual:cesium";
+const RESOLVED_VIRTUAL_CESIUM_ID = "\0virtual:cesium";
+
+const VIRTUAL_VERSION_ID = "virtual:cesium/version";
+const RESOLVED_VIRTUAL_VERSION_ID = "\0virtual:cesium/version";
 
 // ─── Plugin factory ───────────────────────────────────────────────────────────
 
@@ -214,6 +218,7 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
   // Final URL exposed to the browser (and to `virtual:cesium`).
   let cesiumBaseUrl: string;
   let resolvedConfig: ResolvedConfig;
+  let installedCesiumVersion: string;
 
   // ── Peer dependency check ───────────────────────────────────────────────────
   const engineRoot = resolve(process.cwd(), "node_modules/@cesium/engine");
@@ -224,6 +229,16 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
         "  npm i @cesium/engine\n" +
         "  # or: pnpm add @cesium/engine\n",
     );
+  }
+
+  // Read installed version from @cesium/engine's own package.json
+  try {
+    const pkgJson = JSON.parse(
+      readFileSync(join(engineRoot, "package.json"), "utf-8"),
+    ) as { version: string };
+    installedCesiumVersion = pkgJson.version;
+  } catch {
+    installedCesiumVersion = "unknown";
   }
 
   return {
@@ -317,20 +332,26 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       copyCesiumAssets(engineRoot, outDir, assetsPath, debug);
     },
 
-    // ── virtual:cesium ────────────────────────────────────────────────────
+    // ── Virtual modules ───────────────────────────────────────────────────
     resolveId(id) {
-      if (id === VIRTUAL_MODULE_ID) return RESOLVED_VIRTUAL_ID;
+      if (id === VIRTUAL_CESIUM_ID) return RESOLVED_VIRTUAL_CESIUM_ID;
+      if (id === VIRTUAL_VERSION_ID) return RESOLVED_VIRTUAL_VERSION_ID;
       return undefined;
     },
 
     load(id) {
-      if (id !== RESOLVED_VIRTUAL_ID) return undefined;
+      if (id === RESOLVED_VIRTUAL_CESIUM_ID) {
+        return [
+          `export const CESIUM_BASE_URL = ${JSON.stringify(cesiumBaseUrl + "/")};`,
+          `export const ION_TOKEN = ${JSON.stringify(activeToken ?? null)};`,
+        ].join("\n");
+      }
 
-      // Expose typed constants so app code never reads window globals directly.
-      return [
-        `export const CESIUM_BASE_URL = ${JSON.stringify(cesiumBaseUrl + "/")};`,
-        `export const ION_TOKEN = ${JSON.stringify(activeToken ?? null)};`,
-      ].join("\n");
+      if (id === RESOLVED_VIRTUAL_VERSION_ID) {
+        return `export const CESIUM_VERSION = ${JSON.stringify(installedCesiumVersion)};`;
+      }
+
+      return undefined;
     },
 
     // ── Ion token injection ───────────────────────────────────────────────
