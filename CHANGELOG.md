@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.3.0
+
+### Minor Changes
+
+- [`89f527c`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/89f527cd74dcca05b88d485be2bdb11fc1419a16) - Added virtual:cesium/version virtual module
+
 ## 1.2.4
 
 ### Patch Changes
