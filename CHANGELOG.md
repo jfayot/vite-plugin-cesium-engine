@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.3.1
+
+### Patch Changes
+
+- [`9e4f0d2`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/9e4f0d2dc1b2e317cd164f719494e81253803fe4) - Updated README
+
 ## 1.3.0
 
 ### Minor Changes
