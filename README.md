@@ -117,10 +117,10 @@ vite dev                    # uses CESIUM_ION_TOKEN_DEV   (mode defaults to "dev
 
 ---
 
-## Virtual module — `virtual:cesium`
+## Virtual modules
 
-The plugin exposes a typed virtual module so your app code can read
-`CESIUM_BASE_URL` and `ION_TOKEN` without reaching for `window` globals.
+The plugin exposes typed virtual modules so app code never needs to touch
+`window` globals or hardcode paths.
 
 Add the types to your `tsconfig.json`:
 
@@ -132,14 +132,25 @@ Add the types to your `tsconfig.json`:
 }
 ```
 
-Then import anywhere in your app:
+### `virtual:cesium`
 
 ```ts
 import { CESIUM_BASE_URL, ION_TOKEN } from "virtual:cesium";
-
+ 
 console.log(CESIUM_BASE_URL); // e.g. "/cesium/"
 console.log(ION_TOKEN);       // your token, or null
 ```
+
+### `virtual:cesium/version`
+
+```ts
+import { CESIUM_VERSION } from "virtual:cesium/version";
+
+console.log(CESIUM_VERSION); // e.g. "23.0.1"
+```
+
+Useful for logging, bug reports, or conditional behavior when supporting
+multiple Cesium versions in the same codebase.
 
 ---
 
