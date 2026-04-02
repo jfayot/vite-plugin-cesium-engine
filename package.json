@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-cesium-engine",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Zero-config Vite plugin for @cesium/engine — handles assets, CESIUM_BASE_URL, and Ion token automatically.",
   "author": "jfayot",
   "type": "module",

@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.4.1
+
+### Patch Changes
+
+- [`6756006`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/67560067960bda6a198075a19cbf83c77b739a0b) - Fixed missing node:crypto external
+
 ## 1.4.0
 
 ### Minor Changes
