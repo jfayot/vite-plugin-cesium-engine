@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.4.0
+
+### Minor Changes
+
+- [`f15befd`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/f15befd27400e19c2828f9a24c954a0459084fac) - Added inline script SHA-256 hashes extraction for CSP whitelisting
+
 ## 1.3.1
 
 ### Patch Changes
