@@ -5,8 +5,10 @@ import {
   readdirSync,
   copyFileSync,
   readFileSync,
+  writeFileSync,
 } from "node:fs";
 import { resolve, join } from "node:path";
+import { createHash } from "node:crypto";
 import type { Plugin, ResolvedConfig } from "vite";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -75,6 +77,36 @@ export type CesiumEngineOptions = {
    * @default false
    */
   debug?: boolean;
+
+  /**
+   * When set, the plugin will scan the built `index.html` for inline
+   * `<script>` blocks, compute their SHA-256 hashes, and write a JSON file
+   * at this path. The file can then be imported by your Express server to
+   * populate the `script-src` CSP directive automatically.
+   *
+   * The path is relative to `process.cwd()`.
+   *
+   * @example
+   * ```ts
+   * cesiumEngine({ cspHashesOutput: "server/csp-hashes.json" })
+   * ```
+   *
+   * Generated file shape:
+   * ```json
+   * { "scriptHashes": ["'sha256-abc...'", "'sha256-xyz...'"] }
+   * ```
+   *
+   * @default undefined (feature disabled)
+   */
+  cspHashesOutput?: string;
+
+  /**
+   * Path to the built `index.html` to scan for inline scripts when
+   * `cspHashesOutput` is set. Relative to `build.outDir`.
+   *
+   * @default "index.html"
+   */
+  cspHashesHtmlPath?: string;
 };
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -204,6 +236,51 @@ const RESOLVED_VIRTUAL_CESIUM_ID = "\0virtual:cesium";
 const VIRTUAL_VERSION_ID = "virtual:cesium/version";
 const RESOLVED_VIRTUAL_VERSION_ID = "\0virtual:cesium/version";
 
+// ─── CSP hash extraction ──────────────────────────────────────────────────────
+
+/**
+ * Scan an HTML file for inline `<script>` blocks (those without a `src`
+ * attribute), compute a SHA-256 hash for each, and write the result as JSON.
+ *
+ * The generated file has the shape:
+ * ```json
+ * { "scriptHashes": ["'sha256-abc...'", "'sha256-xyz...'"] }
+ * ```
+ */
+function extractCspHashes(
+  htmlPath: string,
+  outputPath: string,
+  debug: boolean,
+): void {
+  if (!existsSync(htmlPath)) {
+    warn(`cspHashesOutput: HTML file not found at "${htmlPath}" — skipping.`);
+    return;
+  }
+
+  const html = readFileSync(htmlPath, "utf-8");
+
+  // Match <script> tags that have no src="..." attribute.
+  const inlineScriptRe =
+    /<script(?![^>]*\bsrc\s*=)[^>]*>([\s\S]*?)<\/script>/gi;
+  const hashes: string[] = [];
+
+  for (const match of html.matchAll(inlineScriptRe)) {
+    const content = match[1].trim();
+    if (!content) continue;
+    const hash = createHash("sha256").update(content).digest("base64");
+    hashes.push(`'sha256-${hash}'`);
+  }
+
+  writeFileSync(outputPath, JSON.stringify({ scriptHashes: hashes }, null, 2));
+
+  if (debug) {
+    log(
+      `cspHashesOutput: ${hashes.length} hash(es) written to "${outputPath}"`,
+    );
+    for (const h of hashes) log(`  ${h}`);
+  }
+}
+
 // ─── Plugin factory ───────────────────────────────────────────────────────────
 
 export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
@@ -212,6 +289,8 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
     cesiumBaseUrl: cesiumBaseUrlOption,
     assetsPath = "cesium",
     debug = false,
+    cspHashesOutput,
+    cspHashesHtmlPath = "index.html",
   } = options;
 
   let activeToken: string | undefined;
@@ -330,6 +409,12 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       if (resolvedConfig.command !== "build") return;
       const outDir = resolve(process.cwd(), resolvedConfig.build.outDir);
       copyCesiumAssets(engineRoot, outDir, assetsPath, debug);
+
+      if (cspHashesOutput) {
+        const htmlPath = resolve(outDir, cspHashesHtmlPath);
+        const outputPath = resolve(process.cwd(), cspHashesOutput);
+        extractCspHashes(htmlPath, outputPath, debug);
+      }
     },
 
     // ── Virtual modules ───────────────────────────────────────────────────
