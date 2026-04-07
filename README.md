@@ -17,7 +17,7 @@ This one is purpose-built for **`@cesium/engine` only** — the lean, widget-fre
 What it does for you automatically:
 
 - ✅ Copies WASM workers, built files, assets, and `CesiumWidget.css` to your output
-- ✅ Injects `window.CESIUM_BASE_URL` before any Cesium module loads
+- ✅ Sets `CESIUM_BASE_URL` as a compile-time `define` constant (no runtime script needed)
 - ✅ Injects the `CesiumWidget.css` `<link>` tag
 - ✅ Optionally bakes your Ion access token in at build time (per-environment support)
 - ✅ Exposes a `virtual:cesium` module for typed access to runtime constants
@@ -61,6 +61,8 @@ import { CesiumWidget } from "@cesium/engine";
 
 const widget = new CesiumWidget(document.getElementById("cesium-container")!);
 ```
+
+`CESIUM_BASE_URL` is set via Vite's `define` mechanism — it's replaced as a compile-time constant inside Cesium's source during bundling, which is how Cesium intends it to be consumed. No `window.CESIUM_BASE_URL` script tag is injected at runtime.
 
 ---
 
@@ -136,7 +138,7 @@ Add the types to your `tsconfig.json`:
 
 ```ts
 import { CESIUM_BASE_URL, ION_TOKEN } from "virtual:cesium";
- 
+
 console.log(CESIUM_BASE_URL); // e.g. "/cesium/"
 console.log(ION_TOKEN);       // your token, or null
 ```
