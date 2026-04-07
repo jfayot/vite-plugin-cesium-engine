@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.5.0
+
+### Minor Changes
+
+- [`944e58e`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/944e58e1066e823078c2e14d9b229779a41a93ff) - Changed CESIUM_BASE_URL handling and removed pointless CSP options
+
 ## 1.4.1
 
 ### Patch Changes
