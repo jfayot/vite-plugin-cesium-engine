@@ -11,7 +11,7 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     rollupOptions: {
-      external: ["node:fs", "node:path", "node:crypto"],
+      external: ["node:fs", "node:path"],
     },
   },
 });

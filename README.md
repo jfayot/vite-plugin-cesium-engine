@@ -22,7 +22,6 @@ What it does for you automatically:
 - ✅ Optionally bakes your Ion access token in at build time (per-environment support)
 - ✅ Exposes a `virtual:cesium` module for typed access to runtime constants
 - ✅ Validates your Ion token format and warns about misconfigurations at startup
-- ✅ Extracts inline script SHA-256 hashes at build time for CSP `script-src` whitelisting
 
 ---
 
@@ -80,12 +79,6 @@ cesiumEngine({
 
   // Print what the plugin is doing at startup
   debug: true,
-
-  // Extract inline script SHA-256 hashes from the built HTML (for CSP)
-  cspHashesOutput: "server/csp-hashes.json",
-
-  // Which HTML file to scan (relative to build.outDir, default: "index.html")
-  cspHashesHtmlPath: "index.html",
 })
 ```
 
@@ -95,65 +88,6 @@ cesiumEngine({
 | `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL path from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
 | `debug` | `boolean` | `false` | Log asset copy targets, resolved token, and base URL at startup. |
-| `cspHashesOutput` | `string` | `undefined` | Path (relative to `cwd`) where the plugin writes a JSON file containing SHA-256 hashes of all inline `<script>` blocks found in the built HTML. Disabled when omitted. |
-| `cspHashesHtmlPath` | `string` | `"index.html"` | Path to the HTML file to scan for inline scripts, relative to `build.outDir`. Only used when `cspHashesOutput` is set. |
-
----
-
-## CSP hashes (Content Security Policy)
-
-Cesium injects inline `<script>` blocks (e.g. `window.CESIUM_BASE_URL`) that are blocked by a strict `script-src 'self'` CSP. Rather than weakening your policy with `'unsafe-inline'`, the plugin can compute the exact SHA-256 hashes of those scripts at build time and write them to a JSON file your server can consume.
-
-### Setup
-
-```ts
-// vite.config.ts
-cesiumEngine({
-  cspHashesOutput: "server/csp-hashes.json",  // written after every build
-})
-```
-
-After `vite build`, a file is created at `server/csp-hashes.json`:
-
-```json
-{
-  "scriptHashes": [
-    "'sha256-SqzQ29dWv4328CnlARcF8f0ispOVT8WNKtVDQN40CXE='",
-    "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"
-  ]
-}
-```
-
-### Consuming in Express + Helmet
-
-```ts
-// server.ts
-import cspHashes from "./csp-hashes.json";
-
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": [
-        "'self'",
-        "'wasm-unsafe-eval'",   // required for Cesium's WASM engine
-        ...cspHashes.scriptHashes,
-      ],
-    },
-  },
-}));
-```
-
-### Scanning a non-default HTML file
-
-If your app uses a custom HTML entry point or a multi-page setup, point the plugin at the right file:
-
-```ts
-cesiumEngine({
-  cspHashesOutput: "server/csp-hashes.json",
-  cspHashesHtmlPath: "app/index.html", // relative to build.outDir
-})
-```
 
 ---
 
@@ -262,9 +196,6 @@ Output at dev-server startup:
   Build/*           → cesium
   Source/Assets/    → cesium
   Widget/*.css      → cesium/Widget
-[cesium-engine] cspHashesOutput: 2 hash(es) written to "server/csp-hashes.json"
-[cesium-engine]   'sha256-SqzQ29dWv4328CnlARcF8f0ispOVT8WNKtVDQN40CXE='
-[cesium-engine]   'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='
 ```
 
 ---

@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "@cesium/engine": "^24.0.0",
-    "vue": "^3.5.31"
+    "vue": "^3.5.32"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.5",
     "typescript": "^6.0.2",
-    "vite": "^8.0.3",
+    "vite": "^8.0.5",
     "vite-plugin-cesium-engine": "^1.4.1",
     "vue-tsc": "^3.2.6"
   }
