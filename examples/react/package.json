@@ -1,5 +1,5 @@
 {
-  "name": "cesium-engine-react-example",
+  "name": "example-react",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -18,7 +18,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.8",
-    "vite-plugin-cesium-engine": "^1.5.1"
+    "vite": "^8.0.9",
+    "vite-plugin-cesium-engine": "workspace:*"
   }
 }

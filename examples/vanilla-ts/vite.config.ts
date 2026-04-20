@@ -3,4 +3,8 @@ import { cesiumEngine } from "vite-plugin-cesium-engine";
 
 export default defineConfig({
   plugins: [cesiumEngine()],
+  resolve: {
+    conditions: ["development"]
+  },
 });
+

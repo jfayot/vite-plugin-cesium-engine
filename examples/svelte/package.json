@@ -1,5 +1,5 @@
 {
-  "name": "cesium-engine-svelte-example",
+  "name": "example-svelte",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,6 +16,6 @@
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.8",
-    "vite-plugin-cesium-engine": "^1.5.1"
+    "vite-plugin-cesium-engine": "workspace:*"
   }
 }

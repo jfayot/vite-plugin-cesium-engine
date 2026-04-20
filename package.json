@@ -30,6 +30,7 @@
   "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
       "types": "./dist/src/index.d.ts",
       "import": "./dist/vite-plugin-cesium-engine.js",
       "require": "./dist/vite-plugin-cesium-engine.umd.cjs"
@@ -41,6 +42,9 @@
   "scripts": {
     "dev": "pnpm build",
     "build": "vite build",
+    "build:examples": "pnpm -r -F \"example-*\" build",
+    "build:all": "pnpm -r build",
+    "dev:react": "pnpm -F example-react dev",
     "release": "pnpm build && npm publish",
     "ci:publish": "pnpm build && changeset publish"
   },
@@ -50,10 +54,10 @@
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
-    "@changesets/cli": "^2.30.0",
+    "@changesets/cli": "^2.31.0",
     "@types/node": "^25.6.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.8",
+    "vite": "^8.0.9",
     "vite-plugin-dts": "^4.5.4"
   }
 }
