@@ -283,7 +283,10 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       // Explicit option wins; env vars are the zero-config fallback.
       activeToken = resolveToken(ionTokenConfig, mode);
       if (activeToken === undefined) {
-        const rawEnv = loadEnv(mode, process.cwd(), "");
+        const rawEnv = {
+          ...cfg.env,
+          ...loadEnv(mode, process.cwd(), "")
+        };
         activeToken = resolveTokenFromEnv(rawEnv, mode);
         if (activeToken !== undefined && debug) {
           const picked = rawEnv[`CESIUM_ION_TOKEN_${mode.toUpperCase()}`]
