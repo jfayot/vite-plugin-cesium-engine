@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.6.0
+
+### Minor Changes
+
+- [`ef8b57d`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/ef8b57d29d3592a480afc2009e51cbdbbad698e1) - Added .env support to read Ion token
+
 ## 1.5.1
 
 ### Patch Changes
