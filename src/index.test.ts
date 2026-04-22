@@ -44,6 +44,7 @@ vi.mock("node:path", async () => {
 
 // ─── Imports after mocks are set up ──────────────────────────────────────────
 import * as fs from "node:fs";
+import { join } from "node:path";
 import type { Plugin, ResolvedConfig, UserConfig, ViteDevServer } from "vite";
 
 // ─── Types re-used across tests ───────────────────────────────────────────────
@@ -557,7 +558,9 @@ describe("closeBundle hook", () => {
       .mocked(fs.mkdirSync)
       .mock.calls.map(([p]) => String(p));
     const allDest = [...destArgs, ...mkdirArgs];
-    expect(allDest.some((d) => d.includes("public/cesium"))).toBe(true);
+    expect(allDest.some((d) => d.includes(join("public", "cesium")))).toBe(
+      true,
+    );
   });
 
   it("emits debug logs for each copy operation when debug: true", async () => {
