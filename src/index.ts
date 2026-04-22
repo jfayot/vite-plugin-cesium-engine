@@ -7,7 +7,7 @@ import {
   readFileSync,
 } from "node:fs";
 import { resolve, join } from "node:path";
-import type { Plugin, ResolvedConfig } from "vite";
+import { loadEnv, type Plugin, type ResolvedConfig } from "vite";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,7 +39,12 @@ export type CesiumEngineOptions = {
    * Accepts a plain string or a `{ [mode]: token }` map for per-environment
    * tokens (Vite `mode` is used as the key).
    *
-   * When omitted, Cesium's built-in default token is used.
+   * When omitted, the plugin automatically checks the following environment
+   * variables (loaded by Vite from your `.env` files):
+   *   - `CESIUM_ION_TOKEN_<MODE>` — e.g. `CESIUM_ION_TOKEN_PRODUCTION`
+   *   - `CESIUM_ION_TOKEN`        — generic fallback for any mode
+   *
+   * Explicit `ionToken` always takes priority over env vars.
    *
    * @see https://ion.cesium.com/tokens
    * @default undefined
@@ -110,6 +115,16 @@ function resolveToken(
   if (tokenConfig === undefined) return undefined;
   if (typeof tokenConfig === "string") return tokenConfig;
   return tokenConfig[mode] ?? tokenConfig["default"];
+}
+
+function resolveTokenFromEnv(
+  env: Record<string, string> | undefined,
+  mode: string,
+): string | undefined {
+  if (!env) return undefined;
+  // Mode-specific var takes priority: CESIUM_ION_TOKEN_PRODUCTION, etc.
+  const modeKey = `CESIUM_ION_TOKEN_${mode.toUpperCase()}`;
+  return env[modeKey] ?? env["CESIUM_ION_TOKEN"];
 }
 
 function validateToken(token: string, mode: string): void {
@@ -265,7 +280,18 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       const { mode } = cfg;
 
       // Resolve Ion token for this mode.
+      // Explicit option wins; env vars are the zero-config fallback.
       activeToken = resolveToken(ionTokenConfig, mode);
+      if (activeToken === undefined) {
+        const rawEnv = loadEnv(mode, process.cwd(), "");
+        activeToken = resolveTokenFromEnv(rawEnv, mode);
+        if (activeToken !== undefined && debug) {
+          const picked = rawEnv[`CESIUM_ION_TOKEN_${mode.toUpperCase()}`]
+            ? `CESIUM_ION_TOKEN_${mode.toUpperCase()}`
+            : "CESIUM_ION_TOKEN";
+          log(`ionToken     : read from env var ${picked}`);
+        }
+      }
       if (activeToken !== undefined) {
         validateToken(activeToken, mode);
       }

@@ -20,6 +20,7 @@ What it does for you automatically:
 - ✅ Sets `CESIUM_BASE_URL` as a compile-time `define` constant (no runtime script needed)
 - ✅ Injects the `CesiumWidget.css` `<link>` tag
 - ✅ Optionally bakes your Ion access token in at build time (per-environment support)
+- ✅ Auto-detects `CESIUM_ION_TOKEN` / `CESIUM_ION_TOKEN_<MODE>` from `.env` files
 - ✅ Exposes a `virtual:cesium` module for typed access to runtime constants
 - ✅ Validates your Ion token format and warns about misconfigurations at startup
 
@@ -86,10 +87,52 @@ cesiumEngine({
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ionToken` | `string \| Record<string, string>` | `undefined` | Ion access token. Use a plain string for all environments, or a `{ [mode]: token }` map for per-environment tokens. |
+| `ionToken` | `string \| Record<string, string>` | `undefined` | Ion access token. Use a plain string for all environments, or a `{ [mode]: token }` map for per-environment tokens. When omitted, the plugin automatically reads `CESIUM_ION_TOKEN_<MODE>` or `CESIUM_ION_TOKEN` from your `.env` files. |
 | `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL path from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
 | `debug` | `boolean` | `false` | Log asset copy targets, resolved token, and base URL at startup. |
+
+---
+
+## Auto `.env` detection
+
+When `ionToken` is not set in the plugin options, the plugin automatically reads
+your Ion token from Vite's loaded environment variables — no boilerplate needed.
+
+Place your token in a `.env` file at the project root:
+
+```bash
+# .env
+CESIUM_ION_TOKEN=eyJhbGci...
+```
+
+Or use a mode-specific file to keep tokens per environment:
+
+```bash
+# .env.production
+CESIUM_ION_TOKEN_PRODUCTION=eyJhbGci...
+
+# .env.development
+CESIUM_ION_TOKEN_DEVELOPMENT=eyJhbGci...
+```
+
+The lookup order is:
+
+1. `CESIUM_ION_TOKEN_<MODE>` (uppercased, e.g. `CESIUM_ION_TOKEN_PRODUCTION`)
+2. `CESIUM_ION_TOKEN` — generic fallback for any mode
+3. Nothing — Cesium's own built-in default token is used
+
+Explicit `ionToken` in the plugin options always takes priority over env vars.
+
+> **Note:** these variables do **not** need the `VITE_` prefix. The plugin reads
+> them server-side during the build and bakes the value in as a string literal —
+> they are never exposed to the client bundle through `import.meta.env`.
+
+When `debug: true` is set, the plugin logs which variable it picked up:
+
+```console
+[cesium-engine] ionToken     : read from env var CESIUM_ION_TOKEN_PRODUCTION
+```
 
 ---
 

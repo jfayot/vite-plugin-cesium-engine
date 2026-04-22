@@ -72,6 +72,7 @@ function makeResolvedConfig(
     command: "build",
     base: "/",
     build: { outDir: "dist" } as ResolvedConfig["build"],
+    env: {},
     ...overrides,
   };
 }
@@ -324,6 +325,74 @@ describe("Ion token resolution", () => {
     await buildPlugin({ ionToken: FAKE_JWT });
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
+  });
+});
+
+describe("Ion token — auto env detection", () => {
+  it("picks up CESIUM_ION_TOKEN from cfg.env when ionToken is not set", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine() as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved({
+      ...makeResolvedConfig(),
+      env: { CESIUM_ION_TOKEN: FAKE_JWT },
+    } as ResolvedConfig);
+    expect(plugin.load("\0virtual:cesium")).toContain(FAKE_JWT);
+  });
+
+  it("prefers CESIUM_ION_TOKEN_<MODE> over the generic var", async () => {
+    const modeToken = "eyJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidHJ1ZSJ9.modeXYZ";
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine() as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved({
+      ...makeResolvedConfig({ mode: "production" }),
+      env: {
+        CESIUM_ION_TOKEN: FAKE_JWT,
+        CESIUM_ION_TOKEN_PRODUCTION: modeToken,
+      },
+    } as ResolvedConfig);
+    expect(plugin.load("\0virtual:cesium")).toContain(modeToken);
+    expect(plugin.load("\0virtual:cesium")).not.toContain(FAKE_JWT);
+  });
+
+  it("explicit ionToken option always overrides env vars", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      ionToken: FAKE_JWT,
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved({
+      ...makeResolvedConfig(),
+      env: { CESIUM_ION_TOKEN: "eyJhbGciOiJIUzI1NiJ9.eyJlbnYiOnRydWV9.envXYZ" },
+    } as ResolvedConfig);
+    expect(plugin.load("\0virtual:cesium")).toContain(FAKE_JWT);
+  });
+
+  it("emits a debug log naming which env var was used", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({ debug: true }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved({
+      ...makeResolvedConfig({ mode: "staging" }),
+      env: { CESIUM_ION_TOKEN: FAKE_JWT },
+    } as ResolvedConfig);
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("CESIUM_ION_TOKEN"),
+    );
+    logSpy.mockRestore();
+  });
+
+  it("leaves token undefined when neither ionToken nor env vars are set", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine() as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved({
+      ...makeResolvedConfig(),
+      env: {},
+    } as ResolvedConfig);
+    expect(plugin.load("\0virtual:cesium")).toContain("ION_TOKEN = null");
   });
 });
 
