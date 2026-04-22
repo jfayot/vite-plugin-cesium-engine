@@ -123,7 +123,7 @@ function validateToken(token: string, mode: string): void {
 
 function normalizePath(raw: string): string {
   // Strip trailing slash, ensure leading slash.
-  return "/" + raw.replace(/^\/|\/$/g, "");
+  return "/" + raw.replace(/^\/|\/+$/g, "");
 }
 
 /**
