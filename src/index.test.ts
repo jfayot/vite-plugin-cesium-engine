@@ -26,12 +26,12 @@ import {
 
 // ─── Mock node:fs ─────────────────────────────────────────────────────────────
 vi.mock("node:fs", () => ({
-  existsSync: vi.fn(),
+  existsSync: vi.fn(() => true),
   cpSync: vi.fn(),
   mkdirSync: vi.fn(),
-  readdirSync: vi.fn(),
+  readdirSync: vi.fn(() => []),
   copyFileSync: vi.fn(),
-  readFileSync: vi.fn(),
+  readFileSync: vi.fn(() => JSON.stringify({ version: "23.0.1" })),
 }));
 
 // ─── Mock node:path (use real logic but spy on it) ────────────────────────────
@@ -98,22 +98,13 @@ async function buildPlugin(
 beforeEach(() => {
   vi.resetModules();
 
-  // By default, make @cesium/engine appear to be installed.
-  vi.mocked(fs.existsSync).mockImplementation((p) => {
-    const s = String(p);
-    return (
-      s.includes("@cesium/engine") ||
-      s.includes("node_modules/@cesium") ||
-      s.includes("cesium_engine")
-    );
-  });
-
-  // Return a minimal package.json for the version read.
-  vi.mocked(fs.readFileSync).mockImplementation(() =>
+  // Re-apply defaults after resetModules clears the mock state.
+  vi.mocked(fs.existsSync).mockImplementation((p) =>
+    String(p).includes("@cesium"),
+  );
+  vi.mocked(fs.readFileSync).mockReturnValue(
     JSON.stringify({ version: "23.0.1" }),
   );
-
-  // readdirSync returns an empty list (no files to copy).
   vi.mocked(fs.readdirSync).mockReturnValue([]);
 });
 
