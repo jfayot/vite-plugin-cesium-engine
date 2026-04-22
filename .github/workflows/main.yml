@@ -29,4 +29,4 @@ jobs:
         with:
           version: 10
       - run: pnpm i
-      - run: pnpm build
+      - run: pnpm build:all

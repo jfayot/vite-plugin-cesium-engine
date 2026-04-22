@@ -4,7 +4,4 @@ import { cesiumEngine } from "vite-plugin-cesium-engine";
 
 export default defineConfig({
   plugins: [svelte(), cesiumEngine()],
-  resolve: {
-    conditions: ["development"]
-  },
 });

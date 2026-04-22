@@ -2,6 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "composite": true,
     "useDefineForClassFields": true,
 
     // This plugin runs in Node, not a browser — no DOM types needed.

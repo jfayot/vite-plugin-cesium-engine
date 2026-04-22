@@ -5,15 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
+    "clean": "rimraf ./dist",
     "preview": "vite preview"
   },
   "dependencies": {
     "@cesium/engine": "^24.0.0"
   },
   "devDependencies": {
+    "rimraf": "^6.1.3",
     "typescript": "^6.0.3",
-    "vite": "^8.0.8",
+    "vite": "^8.0.9",
     "vite-plugin-cesium-engine": "workspace:*"
   }
 }
