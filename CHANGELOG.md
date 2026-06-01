@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.7.0
+
+### Minor Changes
+
+- [`aea71c6`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/aea71c6f86e31ba43840bae2cdbc08b07afab600) - Added sync/async callback support to get Ion token
+
 ## 1.6.0
 
 ### Minor Changes
