@@ -12,7 +12,7 @@ Handles static assets, `CESIUM_BASE_URL`, widget CSS, and your Ion token — not
 ## Why this plugin?
 
 Other Cesium Vite plugins target the full `cesium` package.  
-This one is purpose-built for **`@cesium/engine` only** — the lean, widget-free core — so your bundle stays small and you stay in control of the UI.
+This one is purpose-built for **`@cesium/engine` only** — the lean, widget-free core — so you stay in control of the UI.
 
 What it does for you automatically:
 
@@ -21,7 +21,7 @@ What it does for you automatically:
 - ✅ Injects the `CesiumWidget.css` `<link>` tag
 - ✅ Optionally bakes your Ion access token in at build time (per-environment support)
 - ✅ Auto-detects `CESIUM_ION_TOKEN` / `CESIUM_ION_TOKEN_<MODE>` from `.env` files
-- ✅ Exposes a `virtual:cesium` module for typed access to runtime constants
+- ✅ Exposes `virtual:cesium` and `virtual:cesium/version` modules for typed access to build-time constants
 - ✅ Validates your Ion token format and warns about misconfigurations at startup
 
 ---
@@ -71,7 +71,7 @@ const widget = new CesiumWidget(document.getElementById("cesium-container")!);
 
 ```ts
 cesiumEngine({
-  // Ion token — string or per-environment map (see below)
+  // Ion token — string, per-environment map, sync/async callback, or omit to auto-read from .env
   ionToken: "eyJhbGci...",
 
   // Override where assets are served from (default: derived from Vite's base)
@@ -87,14 +87,38 @@ cesiumEngine({
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ionToken` | `string \| Record<string, string>` | `undefined` | Ion access token. Use a plain string for all environments, or a `{ [mode]: token }` map for per-environment tokens. When omitted, the plugin automatically reads `CESIUM_ION_TOKEN_<MODE>` or `CESIUM_ION_TOKEN` from your `.env` files. |
+| `ionToken` | `string \| Record<string, string> \| (mode) => string \| Promise<string>` | `undefined` | Ion access token. String, per-mode map, or sync/async callback. Omit to auto-read from `.env`. |
 | `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL path from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
 | `debug` | `boolean` | `false` | Log asset copy targets, resolved token, and base URL at startup. |
 
 ---
 
-## Auto `.env` detection
+## Ion token
+
+### Callback (async)
+
+Pass an async function to fetch the token from a secrets manager, vault, or any
+async source. The callback receives the current Vite `mode` and must return a
+`string` or `Promise<string>`. It is called once at build start, after
+`configResolved` — which means sync token sources (string, map, env vars) are
+available immediately, while the callback result is ready before any module
+transforms run.
+
+```ts
+cesiumEngine({
+  ionToken: async (mode) => {
+    // AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, etc.
+    const secret = await getSecret(`cesium-ion-token-${mode}`);
+    return secret.value;
+  },
+})
+```
+
+The callback takes priority over `.env` variables. Returning an empty string is
+treated as no token (Cesium's built-in default is used).
+
+### Auto `.env` detection
 
 When `ionToken` is not set in the plugin options, the plugin automatically reads
 your Ion token from Vite's loaded environment variables — no boilerplate needed.
@@ -125,8 +149,7 @@ The lookup order is:
 Explicit `ionToken` in the plugin options always takes priority over env vars.
 
 > **Note:** these variables do **not** need the `VITE_` prefix. The plugin reads
-> them server-side during the build and bakes the value in as a string literal —
-> they are never exposed to the client bundle through `import.meta.env`.
+> them server-side during the build and bakes the value in as a string literal.
 
 When `debug: true` is set, the plugin logs which variable it picked up:
 
@@ -191,7 +214,7 @@ console.log(ION_TOKEN);       // your token, or null
 ```ts
 import { CESIUM_VERSION } from "virtual:cesium/version";
 
-console.log(CESIUM_VERSION); // e.g. "23.0.1"
+console.log(CESIUM_VERSION); // e.g. "25.0.0"
 ```
 
 Useful for logging, bug reports, or conditional behavior when supporting
@@ -232,15 +255,10 @@ Output at dev-server startup:
 
 ```console
 [cesium-engine] mode         : development
-[cesium-engine] vite base    : ""
+[cesium-engine] vite base    : "(empty)"
 [cesium-engine] cesiumBaseUrl: "/cesium"
 [cesium-engine] assetsPath   : "cesium"
-[cesium-engine] ionToken     : eyJhbGciOiJ… (mode: development)
-[cesium-engine] copying assets:
-  ThirdParty/*.wasm → cesium/ThirdParty
-  Build/*           → cesium
-  Source/Assets/    → cesium
-  Widget/*.css      → cesium/Widget
+[cesium-engine] ionToken     : eyJhbGciOiJ... (mode: development)
 ```
 
 ---
@@ -259,9 +277,11 @@ Complete, ready-to-run starter projects are available in the [`examples/`](./exa
 Each example includes all project files and can be run with:
 
 ```bash
-cd examples/react   # or vue / svelte / vanilla
 pnpm install
-pnpm dev
+pnpm dev:react
+pnpm dev:svelte
+pnpm dev:vanilla-ts
+pnpm dev:vue
 ```
 
 ---

@@ -7,37 +7,52 @@ import {
   readFileSync,
 } from "node:fs";
 import { resolve, join } from "node:path";
-import { loadEnv, type Plugin, type ResolvedConfig } from "vite";
+import { type Plugin, type ResolvedConfig } from "vite";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /**
  * Ion access token configuration.
  *
- * Supply a single string to use the same token in every environment, or an
- * object to select a token based on the current Vite `mode`
- * (e.g. `"development"`, `"staging"`, `"production"`).
+ * Accepts:
+ * - A plain `string` — same token in every environment
+ * - A `Record<string, string>` — keyed by Vite `mode`
+ * - A callback `(mode: string) => string | Promise<string>` — resolved at
+ *   build start, useful for secrets managers or async vault lookups
  *
- * @example single token
+ * When omitted, the plugin looks for `CESIUM_ION_TOKEN` (or
+ * `CESIUM_ION_TOKEN_<MODE>`) in the Vite env automatically.
+ *
+ * @example plain string
  * ```ts
  * ionToken: "eyJhbGci..."
  * ```
  *
- * @example per-environment tokens
+ * @example per-environment map
  * ```ts
  * ionToken: {
- *   development: "eyJhbGci...",   // local dev token (lower quota)
- *   production:  "eyJhbGci...",   // production token
+ *   development: "eyJhbGci...",
+ *   production:  "eyJhbGci...",
+ * }
+ * ```
+ *
+ * @example async callback (e.g. AWS Secrets Manager)
+ * ```ts
+ * ionToken: async (mode) => {
+ *   const secret = await getSecret(`cesium-ion-token-${mode}`);
+ *   return secret.value;
  * }
  * ```
  */
-export type IonTokenConfig = string | Record<string, string>;
+export type IonTokenCallback = (mode: string) => string | Promise<string>;
+export type IonTokenConfig = string | Record<string, string> | IonTokenCallback;
 
 export type CesiumEngineOptions = {
   /**
    * Cesium Ion default access token, baked in at build time.
-   * Accepts a plain string or a `{ [mode]: token }` map for per-environment
-   * tokens (Vite `mode` is used as the key).
+   *
+   * Accepts a plain string, a `{ [mode]: token }` map, or an async callback
+   * `(mode) => Promise<string>` for secrets manager / vault integrations.
    *
    * When omitted, the plugin automatically checks the following environment
    * variables (loaded by Vite from your `.env` files):
@@ -108,23 +123,24 @@ function warn(message: string): void {
   console.warn(`\x1b[33m[cesium-engine]\x1b[0m ${message}`);
 }
 
-function resolveToken(
+async function resolveToken(
   tokenConfig: IonTokenConfig | undefined,
   mode: string,
-): string | undefined {
-  if (tokenConfig === undefined) return undefined;
-  if (typeof tokenConfig === "string") return tokenConfig;
-  return tokenConfig[mode] ?? tokenConfig["default"];
-}
+  env: Record<string, string>,
+): Promise<string | undefined> {
+  // 1. Explicit option takes priority
+  if (tokenConfig !== undefined) {
+    if (typeof tokenConfig === "function") {
+      const result = await tokenConfig(mode);
+      return result || undefined;
+    }
+    if (typeof tokenConfig === "string") return tokenConfig || undefined;
+    return tokenConfig[mode] ?? tokenConfig["default"] ?? undefined;
+  }
 
-function resolveTokenFromEnv(
-  env: Record<string, string> | undefined,
-  mode: string,
-): string | undefined {
-  if (!env) return undefined;
-  // Mode-specific var takes priority: CESIUM_ION_TOKEN_PRODUCTION, etc.
+  // 2. Auto env detection: mode-specific key first, then generic key
   const modeKey = `CESIUM_ION_TOKEN_${mode.toUpperCase()}`;
-  return env[modeKey] ?? env["CESIUM_ION_TOKEN"];
+  return env[modeKey] || env["CESIUM_ION_TOKEN"] || undefined;
 }
 
 function validateToken(token: string, mode: string): void {
@@ -136,9 +152,38 @@ function validateToken(token: string, mode: string): void {
   }
 }
 
+function logResolvedToken(
+  token: string | undefined,
+  config: IonTokenConfig | undefined,
+  mode: string,
+  env: Record<string, string>,
+): void {
+  if (token === undefined) {
+    log(`ionToken     : none (using Cesium default)`);
+    return;
+  }
+  const preview = `${token.slice(0, 12)}...`;
+  if (typeof config === "function") {
+    log(`ionToken     : ${preview} (mode: ${mode}, via callback)`);
+  } else if (config === undefined) {
+    const envKey = env[`CESIUM_ION_TOKEN_${mode.toUpperCase()}`]
+      ? `CESIUM_ION_TOKEN_${mode.toUpperCase()}`
+      : "CESIUM_ION_TOKEN";
+    log(`ionToken     : ${preview} (from env ${envKey})`);
+  } else {
+    log(`ionToken     : ${preview} (mode: ${mode})`);
+  }
+}
+
 function normalizePath(raw: string): string {
-  // Strip trailing slash, ensure leading slash.
-  return "/" + raw.replace(/^\/|\/+$/g, "");
+  let start = 0;
+  let end = raw.length;
+
+  while (start < end && raw.charCodeAt(start) === 47) start++;
+
+  while (end > start && raw.charCodeAt(end - 1) === 47) end--;
+
+  return "/" + raw.slice(start, end);
 }
 
 /**
@@ -177,7 +222,7 @@ function copyCesiumAssets(
 
   const copies: Array<{ label: string; fn: () => void }> = [
     {
-      label: `ThirdParty/*.wasm → ${assetsPath}/ThirdParty`,
+      label: `ThirdParty/*.wasm -> ${assetsPath}/ThirdParty`,
       fn: () =>
         copyByExtension(
           join(engineRoot, "Source/ThirdParty"),
@@ -186,16 +231,16 @@ function copyCesiumAssets(
         ),
     },
     {
-      label: `Build/* → ${assetsPath}`,
+      label: `Build/* -> ${assetsPath}`,
       fn: () => copyDir(join(engineRoot, "Build"), dest),
     },
     {
-      label: `Source/Assets/ → ${assetsPath}/Assets`,
+      label: `Source/Assets/ -> ${assetsPath}/Assets`,
       fn: () =>
         copyDir(join(engineRoot, "Source/Assets"), join(dest, "Assets")),
     },
     {
-      label: `Widget/*.css → ${assetsPath}/Widget`,
+      label: `Widget/*.css -> ${assetsPath}/Widget`,
       fn: () =>
         copyByExtension(
           join(engineRoot, "Source/Widget"),
@@ -279,26 +324,6 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       resolvedConfig = cfg;
       const { mode } = cfg;
 
-      // Resolve Ion token for this mode.
-      // Explicit option wins; env vars are the zero-config fallback.
-      activeToken = resolveToken(ionTokenConfig, mode);
-      if (activeToken === undefined) {
-        const rawEnv = {
-          ...cfg.env,
-          ...loadEnv(mode, process.cwd(), "")
-        };
-        activeToken = resolveTokenFromEnv(rawEnv, mode);
-        if (activeToken !== undefined && debug) {
-          const picked = rawEnv[`CESIUM_ION_TOKEN_${mode.toUpperCase()}`]
-            ? `CESIUM_ION_TOKEN_${mode.toUpperCase()}`
-            : "CESIUM_ION_TOKEN";
-          log(`ionToken     : read from env var ${picked}`);
-        }
-      }
-      if (activeToken !== undefined) {
-        validateToken(activeToken, mode);
-      }
-
       // Build CESIUM_BASE_URL: explicit option wins, then derive from Vite base.
       const viteBase = (cfg.base ?? "").replace(/\/$/, "");
       cesiumBaseUrl = cesiumBaseUrlOption
@@ -322,13 +347,6 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
         log(`vite base    : "${viteBase || "(empty)"}"`);
         log(`cesiumBaseUrl: "${cesiumBaseUrl}"`);
         log(`assetsPath   : "${assetsPath}"`);
-        log(
-          `ionToken     : ${
-            activeToken
-              ? `${activeToken.slice(0, 12)}… (mode: ${mode})`
-              : "none (using Cesium default)"
-          }`,
-        );
       }
     },
 
@@ -364,6 +382,21 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
 
         next();
       });
+    },
+
+    // ── buildStart: resolve async token ───────────────────────────────────
+    async buildStart() {
+      const { mode, env } = resolvedConfig;
+
+      activeToken = await resolveToken(ionTokenConfig, mode, env);
+
+      if (activeToken !== undefined) {
+        validateToken(activeToken, mode);
+      }
+
+      if (debug) {
+        logResolvedToken(activeToken, ionTokenConfig, mode, env);
+      }
     },
 
     // ── Build: copy assets after output is written ────────────────────────

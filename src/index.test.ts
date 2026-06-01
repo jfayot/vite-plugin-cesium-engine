@@ -54,6 +54,7 @@ type PluginWithHooks = Plugin & {
   resolveId: (id: string) => string | undefined;
   load: (id: string) => string | undefined;
   transform: (code: string, id: string) => string | undefined;
+  buildStart: () => Promise<void>;
   transformIndexHtml: () => Array<{
     tag: string;
     injectTo: string;
@@ -92,6 +93,8 @@ async function buildPlugin(
   // Run configResolved hook.
   const resolvedConfig = makeResolvedConfig(resolvedCfgOverrides);
   plugin.configResolved(resolvedConfig as ResolvedConfig);
+
+  await plugin.buildStart();
 
   return plugin;
 }
@@ -328,6 +331,125 @@ describe("Ion token resolution", () => {
   });
 });
 
+describe("Ion token — async callback", () => {
+  it("resolves token from a synchronous callback", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      ionToken: (_mode) => FAKE_JWT,
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
+    await plugin.buildStart();
+    expect(plugin.load("\0virtual:cesium")).toContain(FAKE_JWT);
+  });
+
+  it("resolves token from an async callback", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      ionToken: async (_mode) => {
+        await new Promise((r) => setTimeout(r, 10));
+        return FAKE_JWT;
+      },
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
+    await plugin.buildStart();
+    expect(plugin.load("\0virtual:cesium")).toContain(FAKE_JWT);
+  });
+
+  it("passes the current Vite mode to the callback", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const receivedModes: string[] = [];
+    const plugin = cesiumEngine({
+      ionToken: (mode) => {
+        receivedModes.push(mode);
+        return FAKE_JWT;
+      },
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved(
+      makeResolvedConfig({ mode: "staging" }) as ResolvedConfig,
+    );
+    await plugin.buildStart();
+    expect(receivedModes).toEqual(["staging"]);
+  });
+
+  it("does NOT resolve token in configResolved when ionToken is a callback", async () => {
+    // Token must be undefined after configResolved and only set after buildStart.
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      ionToken: async () => FAKE_JWT,
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
+    // Before buildStart: token not yet resolved
+    expect(plugin.load("\0virtual:cesium")).toContain("ION_TOKEN = null");
+    await plugin.buildStart();
+    // After buildStart: token resolved
+    expect(plugin.load("\0virtual:cesium")).toContain(FAKE_JWT);
+  });
+
+  it("emits a debug log after async resolution", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      ionToken: async () => FAKE_JWT,
+      debug: true,
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
+    logSpy.mockClear();
+    await plugin.buildStart();
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("via callback"),
+    );
+    logSpy.mockRestore();
+  });
+
+  it("warns when callback returns a non-JWT string", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      ionToken: async () => "not-a-jwt",
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
+    await plugin.buildStart();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("does not look like a valid Cesium Ion JWT"),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("leaves token null when callback returns an empty string", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      ionToken: async () => "",
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
+    await plugin.buildStart();
+    expect(plugin.load("\0virtual:cesium")).toContain("ION_TOKEN = null");
+  });
+
+  it("callback overrides env vars", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const callbackToken =
+      "eyJhbGciOiJIUzI1NiJ9.eyJjYWxsYmFjayI6dHJ1ZX0.callbackXYZ";
+    const plugin = cesiumEngine({
+      ionToken: async () => callbackToken,
+    }) as unknown as PluginWithHooks;
+    plugin.config({ base: "/" });
+    plugin.configResolved({
+      ...makeResolvedConfig(),
+      env: { CESIUM_ION_TOKEN: FAKE_JWT },
+    } as ResolvedConfig);
+    await plugin.buildStart();
+    expect(plugin.load("\0virtual:cesium")).toContain(callbackToken);
+    expect(plugin.load("\0virtual:cesium")).not.toContain(FAKE_JWT);
+  });
+});
+
 describe("Ion token — auto env detection", () => {
   it("picks up CESIUM_ION_TOKEN from cfg.env when ionToken is not set", async () => {
     const { cesiumEngine } = await import("./index.js");
@@ -337,6 +459,7 @@ describe("Ion token — auto env detection", () => {
       ...makeResolvedConfig(),
       env: { CESIUM_ION_TOKEN: FAKE_JWT },
     } as ResolvedConfig);
+    await plugin.buildStart();
     expect(plugin.load("\0virtual:cesium")).toContain(FAKE_JWT);
   });
 
@@ -352,6 +475,7 @@ describe("Ion token — auto env detection", () => {
         CESIUM_ION_TOKEN_PRODUCTION: modeToken,
       },
     } as ResolvedConfig);
+    await plugin.buildStart();
     expect(plugin.load("\0virtual:cesium")).toContain(modeToken);
     expect(plugin.load("\0virtual:cesium")).not.toContain(FAKE_JWT);
   });
@@ -366,6 +490,7 @@ describe("Ion token — auto env detection", () => {
       ...makeResolvedConfig(),
       env: { CESIUM_ION_TOKEN: "eyJhbGciOiJIUzI1NiJ9.eyJlbnYiOnRydWV9.envXYZ" },
     } as ResolvedConfig);
+    await plugin.buildStart();
     expect(plugin.load("\0virtual:cesium")).toContain(FAKE_JWT);
   });
 
@@ -376,10 +501,12 @@ describe("Ion token — auto env detection", () => {
     plugin.config({ base: "/" });
     plugin.configResolved({
       ...makeResolvedConfig({ mode: "staging" }),
-      env: { CESIUM_ION_TOKEN: FAKE_JWT },
+      env: { CESIUM_ION_TOKEN_STAGING: FAKE_JWT },
     } as ResolvedConfig);
+    logSpy.mockClear();
+    await plugin.buildStart();
     expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("CESIUM_ION_TOKEN"),
+      expect.stringContaining("CESIUM_ION_TOKEN_STAGING"),
     );
     logSpy.mockRestore();
   });
@@ -392,6 +519,7 @@ describe("Ion token — auto env detection", () => {
       ...makeResolvedConfig(),
       env: {},
     } as ResolvedConfig);
+    await plugin.buildStart();
     expect(plugin.load("\0virtual:cesium")).toContain("ION_TOKEN = null");
   });
 });
@@ -449,6 +577,7 @@ describe("load hook — virtual:cesium", () => {
     }) as unknown as PluginWithHooks;
     const defineCfg = plugin.config({ base: "/" });
     plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
+    await plugin.buildStart();
 
     const defineVal = defineCfg?.define?.["CESIUM_BASE_URL"]; // e.g. '"/my/cesium/"'
     const virtualSrc = plugin.load("\0virtual:cesium")!;
