@@ -6,6 +6,8 @@ Handles static assets, `CESIUM_BASE_URL`, widget CSS, and your Ion token — not
 [![npm](https://img.shields.io/npm/v/vite-plugin-cesium-engine.svg)](https://www.npmjs.com/package/vite-plugin-cesium-engine)
 [![license](https://img.shields.io/npm/l/vite-plugin-cesium-engine.svg)](LICENSE)
 [![npm downloads](https://img.shields.io/npm/dm/vite-plugin-cesium-engine.svg)](https://www.npmjs.com/package/vite-plugin-cesium-engine)
+![build](https://github.com/jfayot/vite-plugin-cesium-engine/actions/workflows/main.yml/badge.svg)
+![release](https://github.com/jfayot/vite-plugin-cesium-engine/actions/workflows/release.yml/badge.svg)
 
 ---
 
