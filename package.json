@@ -25,7 +25,7 @@
     "dist",
     "virtual.d.ts"
   ],
-  "main": "./dist/vite-plugin-cesium-engine.umd.cjs",
+  "main": "./dist/vite-plugin-cesium-engine.cjs",
   "module": "./dist/vite-plugin-cesium-engine.js",
   "types": "./dist/src/index.d.ts",
   "exports": {
@@ -33,7 +33,7 @@
       "development": "./src/index.ts",
       "types": "./dist/src/index.d.ts",
       "import": "./dist/vite-plugin-cesium-engine.js",
-      "require": "./dist/vite-plugin-cesium-engine.umd.cjs"
+      "require": "./dist/vite-plugin-cesium-engine.cjs"
     },
     "./virtual": {
       "types": "./virtual.d.ts"
