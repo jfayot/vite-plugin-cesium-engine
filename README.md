@@ -8,7 +8,7 @@ Handles static assets, `CESIUM_BASE_URL`, widget CSS, and your Ion token — not
 [![npm downloads](https://img.shields.io/npm/dm/vite-plugin-cesium-engine.svg)](https://www.npmjs.com/package/vite-plugin-cesium-engine)
 ![build](https://github.com/jfayot/vite-plugin-cesium-engine/actions/workflows/main.yml/badge.svg)
 ![release](https://github.com/jfayot/vite-plugin-cesium-engine/actions/workflows/release.yml/badge.svg)
-
+[![All Contributors](https://img.shields.io/github/all-contributors/jfayot/vite-plugin-cesium-engine?color=ee8449&style=flat-square)](#contributors)
 ---
 
 ## Why this plugin?
@@ -304,6 +304,19 @@ build: {
   },
 },
 ```
+
+---
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ---
 
