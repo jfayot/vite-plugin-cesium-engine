@@ -1,4 +1,21 @@
 {
   "projectName": "vite-plugin-cesium-engine",
-  "projectOwner": "jfayot"
+  "projectOwner": "jfayot",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "jamilahmadzai",
+      "name": "Jamil Ur Rehman Ahmadzai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12057312?v=4",
+      "profile": "https://www.linkedin.com/in/jamil-ur-rehman-ahmadzai-8424081b1/",
+      "contributions": [
+        "code"
+      ]
+    }
+  ]
 }
