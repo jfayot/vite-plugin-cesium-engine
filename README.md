@@ -316,6 +316,7 @@ build: {
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/jamil-ur-rehman-ahmadzai-8424081b1/"><img src="https://avatars.githubusercontent.com/u/12057312?v=4?s=100" width="100px;" alt="Jamil Ur Rehman Ahmadzai"/><br /><sub><b>Jamil Ur Rehman Ahmadzai</b></sub></a><br /><a href="#code-jamilahmadzai" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://etuardu.github.io/"><img src="https://avatars.githubusercontent.com/u/6411154?v=4?s=100" width="100px;" alt="etuardu"/><br /><sub><b>etuardu</b></sub></a><br /><a href="#code-etuardu" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
