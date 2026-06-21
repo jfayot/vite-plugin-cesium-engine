@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.7.1
+
+### Patch Changes
+
+- [#153](https://github.com/jfayot/vite-plugin-cesium-engine/pull/153) [`2548f04`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/2548f04df91b9c91394e0cdbe78d03471f93cfcd) Thanks [@jamilahmadzai](https://github.com/jamilahmadzai)! - Fix the CommonJS package entrypoint to match the emitted build artifact.
+
 ## 1.7.0
 
 ### Minor Changes
