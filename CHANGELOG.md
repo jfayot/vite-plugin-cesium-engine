@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.8.0
+
+### Minor Changes
+
+- [`fc2caf1`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/fc2caf1fa13e44f7dafe6145cb9b4151831794a5) Thanks [@jfayot](https://github.com/jfayot)! - Added chunkName option to allow splitting @cesium/engine into its own chunk
+
 ## 1.7.1
 
 ### Patch Changes
