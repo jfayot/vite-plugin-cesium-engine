@@ -15,14 +15,7 @@
  * only (verifying the middleware is registered without spinning up a real server).
  */
 
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // ─── Mock node:fs ─────────────────────────────────────────────────────────────
 vi.mock("node:fs", () => ({
@@ -36,7 +29,7 @@ vi.mock("node:fs", () => ({
 
 // ─── Mock node:path (use real logic but spy on it) ────────────────────────────
 // We keep real path behavior so path.join / path.resolve work naturally.
-import * as nodePath from "node:path";
+import type * as nodePath from "node:path";
 vi.mock("node:path", async () => {
   const real = await vi.importActual<typeof nodePath>("node:path");
   return { ...real };
@@ -65,9 +58,7 @@ type PluginWithHooks = Plugin & {
 };
 
 // ─── Helper: build a minimal ResolvedConfig ────────────────────────────────
-function makeResolvedConfig(
-  overrides: Partial<ResolvedConfig> = {},
-): Partial<ResolvedConfig> {
+function makeResolvedConfig(overrides: Partial<ResolvedConfig> = {}): Partial<ResolvedConfig> {
   return {
     mode: "production",
     command: "build",
@@ -80,6 +71,7 @@ function makeResolvedConfig(
 
 // ─── Helper: build and configure a plugin ─────────────────────────────────
 async function buildPlugin(
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   options: Parameters<typeof import("./index.js").cesiumEngine>[0] = {},
   resolvedCfgOverrides: Partial<ResolvedConfig> = {},
 ): Promise<PluginWithHooks> {
@@ -104,12 +96,8 @@ beforeEach(() => {
   vi.resetModules();
 
   // Re-apply defaults after resetModules clears the mock state.
-  vi.mocked(fs.existsSync).mockImplementation((p) =>
-    String(p).includes("@cesium"),
-  );
-  vi.mocked(fs.readFileSync).mockReturnValue(
-    JSON.stringify({ version: "23.0.1" }),
-  );
+  vi.mocked(fs.existsSync).mockImplementation((p) => String(p).includes("@cesium"));
+  vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({ version: "23.0.1" }));
   vi.mocked(fs.readdirSync).mockReturnValue([]);
 });
 
@@ -154,7 +142,7 @@ describe("cesiumEngine()", () => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// 2. config hook
+// 2a. config hook
 // ═════════════════════════════════════════════════════════════════════════════
 
 describe("config hook", () => {
@@ -212,6 +200,131 @@ describe("config hook", () => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+// 2b. chunkName option (manual chunking)
+// ═════════════════════════════════════════════════════════════════════════════
+
+describe("config hook — chunkName option", () => {
+  it("does NOT set manualChunks when chunkName is omitted", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine() as unknown as PluginWithHooks;
+    const result = plugin.config({ base: "/" });
+    expect(result?.build?.rollupOptions?.output).toBeUndefined();
+  });
+
+  it("sets build.rollupOptions.output.manualChunks when chunkName is provided", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      chunkName: "vendor-cesium",
+    }) as unknown as PluginWithHooks;
+    const result = plugin.config({ base: "/" });
+    const output = result?.build?.rollupOptions?.output as
+      | { manualChunks?: (id: string) => string | undefined }
+      | undefined;
+    expect(typeof output?.manualChunks).toBe("function");
+  });
+
+  it("manualChunks returns the configured chunkName for @cesium/engine modules", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      chunkName: "vendor-cesium",
+    }) as unknown as PluginWithHooks;
+    const result = plugin.config({ base: "/" });
+    const output = result?.build?.rollupOptions?.output as {
+      manualChunks: (id: string) => string | undefined;
+    };
+    expect(output.manualChunks("/project/node_modules/@cesium/engine/Source/Core/Ion.js")).toBe(
+      "vendor-cesium",
+    );
+  });
+
+  it("manualChunks returns the configured chunkName for Windows-style @cesium\\engine paths", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      chunkName: "vendor-cesium",
+    }) as unknown as PluginWithHooks;
+    const result = plugin.config({ base: "/" });
+    const output = result?.build?.rollupOptions?.output as {
+      manualChunks: (id: string) => string | undefined;
+    };
+    expect(
+      output.manualChunks("C:\\project\\node_modules\\@cesium\\engine\\Source\\Core\\Ion.js"),
+    ).toBe("vendor-cesium");
+  });
+
+  it("manualChunks returns undefined for modules outside @cesium/engine", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      chunkName: "vendor-cesium",
+    }) as unknown as PluginWithHooks;
+    const result = plugin.config({ base: "/" });
+    const output = result?.build?.rollupOptions?.output as {
+      manualChunks: (id: string) => string | undefined;
+    };
+    expect(output.manualChunks("/project/src/main.ts")).toBeUndefined();
+  });
+
+  it("does not affect the CESIUM_BASE_URL define when chunkName is set", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      chunkName: "vendor-cesium",
+    }) as unknown as PluginWithHooks;
+    const result = plugin.config({ base: "/" });
+    expect(result?.define?.["CESIUM_BASE_URL"]).toBe('"/cesium/"');
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 2c. cesiumChunks() exported helper
+// ═════════════════════════════════════════════════════════════════════════════
+
+describe("cesiumChunks()", () => {
+  it("defaults to chunk name 'cesium' when called with no arguments", async () => {
+    const { cesiumChunks } = await import("./index.js");
+    const fn = cesiumChunks();
+    expect(fn("/project/node_modules/@cesium/engine/Source/Core/Ion.js")).toBe("cesium");
+  });
+
+  it("uses the provided chunk name", async () => {
+    const { cesiumChunks } = await import("./index.js");
+    const fn = cesiumChunks("vendor-cesium");
+    expect(fn("/project/node_modules/@cesium/engine/Source/Core/Ion.js")).toBe("vendor-cesium");
+  });
+
+  it("matches forward-slash @cesium/engine paths", async () => {
+    const { cesiumChunks } = await import("./index.js");
+    const fn = cesiumChunks("vendor-cesium");
+    expect(fn("@cesium/engine/Source/Scene/Globe.js")).toBe("vendor-cesium");
+  });
+
+  it("matches backslash @cesium\\engine paths (Windows)", async () => {
+    const { cesiumChunks } = await import("./index.js");
+    const fn = cesiumChunks("vendor-cesium");
+    expect(fn("C:\\project\\node_modules\\@cesium\\engine\\Source\\Scene\\Globe.js")).toBe(
+      "vendor-cesium",
+    );
+  });
+
+  it("returns undefined for ids that do not include @cesium/engine", async () => {
+    const { cesiumChunks } = await import("./index.js");
+    const fn = cesiumChunks("vendor-cesium");
+    expect(fn("/project/src/components/Map.tsx")).toBeUndefined();
+    expect(fn("/project/node_modules/react/index.js")).toBeUndefined();
+  });
+
+  it("can be composed inside a custom manualChunks function", async () => {
+    const { cesiumChunks } = await import("./index.js");
+    const cesiumFn = cesiumChunks("vendor-cesium");
+    const manualChunks = (id: string): string | undefined => {
+      if (id.includes("three")) return "vendor-3d";
+      return cesiumFn(id);
+    };
+    expect(manualChunks("/node_modules/three/build/three.module.js")).toBe("vendor-3d");
+    expect(manualChunks("/node_modules/@cesium/engine/Source/Core/Ion.js")).toBe("vendor-cesium");
+    expect(manualChunks("/src/App.tsx")).toBeUndefined();
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
 // 3. configResolved hook
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -223,9 +336,7 @@ describe("configResolved hook", () => {
       cesiumBaseUrl: "/cdn/cesium",
     }) as unknown as PluginWithHooks;
     plugin.config({ base: "/app" });
-    plugin.configResolved(
-      makeResolvedConfig({ base: "/app" }) as ResolvedConfig,
-    );
+    plugin.configResolved(makeResolvedConfig({ base: "/app" }) as ResolvedConfig);
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining("does not start with Vite's base"),
     );
@@ -239,9 +350,7 @@ describe("configResolved hook", () => {
       cesiumBaseUrl: "/app/cesium",
     }) as unknown as PluginWithHooks;
     plugin.config({ base: "/app" });
-    plugin.configResolved(
-      makeResolvedConfig({ base: "/app" }) as ResolvedConfig,
-    );
+    plugin.configResolved(makeResolvedConfig({ base: "/app" }) as ResolvedConfig);
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
   });
@@ -335,7 +444,7 @@ describe("Ion token — async callback", () => {
   it("resolves token from a synchronous callback", async () => {
     const { cesiumEngine } = await import("./index.js");
     const plugin = cesiumEngine({
-      ionToken: (_mode) => FAKE_JWT,
+      ionToken: () => FAKE_JWT,
     }) as unknown as PluginWithHooks;
     plugin.config({ base: "/" });
     plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
@@ -346,7 +455,7 @@ describe("Ion token — async callback", () => {
   it("resolves token from an async callback", async () => {
     const { cesiumEngine } = await import("./index.js");
     const plugin = cesiumEngine({
-      ionToken: async (_mode) => {
+      ionToken: async () => {
         await new Promise((r) => setTimeout(r, 10));
         return FAKE_JWT;
       },
@@ -367,9 +476,7 @@ describe("Ion token — async callback", () => {
       },
     }) as unknown as PluginWithHooks;
     plugin.config({ base: "/" });
-    plugin.configResolved(
-      makeResolvedConfig({ mode: "staging" }) as ResolvedConfig,
-    );
+    plugin.configResolved(makeResolvedConfig({ mode: "staging" }) as ResolvedConfig);
     await plugin.buildStart();
     expect(receivedModes).toEqual(["staging"]);
   });
@@ -400,9 +507,7 @@ describe("Ion token — async callback", () => {
     plugin.configResolved(makeResolvedConfig() as ResolvedConfig);
     logSpy.mockClear();
     await plugin.buildStart();
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("via callback"),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("via callback"));
     logSpy.mockRestore();
   });
 
@@ -434,8 +539,7 @@ describe("Ion token — async callback", () => {
 
   it("callback overrides env vars", async () => {
     const { cesiumEngine } = await import("./index.js");
-    const callbackToken =
-      "eyJhbGciOiJIUzI1NiJ9.eyJjYWxsYmFjayI6dHJ1ZX0.callbackXYZ";
+    const callbackToken = "eyJhbGciOiJIUzI1NiJ9.eyJjYWxsYmFjayI6dHJ1ZX0.callbackXYZ";
     const plugin = cesiumEngine({
       ionToken: async () => callbackToken,
     }) as unknown as PluginWithHooks;
@@ -505,9 +609,7 @@ describe("Ion token — auto env detection", () => {
     } as ResolvedConfig);
     logSpy.mockClear();
     await plugin.buildStart();
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("CESIUM_ION_TOKEN_STAGING"),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("CESIUM_ION_TOKEN_STAGING"));
     logSpy.mockRestore();
   });
 
@@ -536,9 +638,7 @@ describe("resolveId hook", () => {
 
   it("resolves virtual:cesium/version to \\0virtual:cesium/version", async () => {
     const plugin = await buildPlugin();
-    expect(plugin.resolveId("virtual:cesium/version")).toBe(
-      "\0virtual:cesium/version",
-    );
+    expect(plugin.resolveId("virtual:cesium/version")).toBe("\0virtual:cesium/version");
   });
 
   it("returns undefined for unknown ids", async () => {
@@ -583,9 +683,7 @@ describe("load hook — virtual:cesium", () => {
     const virtualSrc = plugin.load("\0virtual:cesium")!;
     // Both should expose the same URL (strip outer quotes from the define string).
     const defineUrl = defineVal?.replace(/^"|"$/g, "");
-    expect(virtualSrc).toContain(
-      `export const CESIUM_BASE_URL = "${defineUrl}"`,
-    );
+    expect(virtualSrc).toContain(`export const CESIUM_BASE_URL = "${defineUrl}"`);
   });
 
   it("returns undefined for unknown resolved ids", async () => {
@@ -625,10 +723,7 @@ describe("transform hook", () => {
   it("handles the $1 suffix variant (Vite scope rewriting)", async () => {
     const plugin = await buildPlugin({ ionToken: FAKE_JWT });
     const code = `Ion.defaultAccessToken = defaultAccessToken$1`;
-    const result = plugin.transform(
-      code,
-      "/node_modules/@cesium/engine/Source/Core/Ion.js",
-    );
+    const result = plugin.transform(code, "/node_modules/@cesium/engine/Source/Core/Ion.js");
     expect(result).toContain(`Ion.defaultAccessToken = "${FAKE_JWT}"`);
     expect(result).not.toContain("defaultAccessToken$1");
   });
@@ -650,13 +745,8 @@ describe("transform hook", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const plugin = await buildPlugin({ ionToken: FAKE_JWT });
     // Ion module detected but the token assignment line is absent.
-    plugin.transform(
-      "// no token line here",
-      "@cesium/engine/Source/Core/Ion.js",
-    );
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Ion token: pattern not found"),
-    );
+    plugin.transform("// no token line here", "@cesium/engine/Source/Core/Ion.js");
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Ion token: pattern not found"));
     warnSpy.mockRestore();
   });
 
@@ -680,9 +770,7 @@ describe("transform hook", () => {
       "Ion.defaultAccessToken = defaultAccessToken",
       "@cesium/engine/Source/Core/Ion.js",
     );
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Ion token injected"),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Ion token injected"));
     logSpy.mockRestore();
   });
 });
@@ -730,8 +818,7 @@ describe("closeBundle hook", () => {
     plugin.closeBundle();
     // cpSync is used for directory copies; mkdirSync for leaf dirs.
     expect(
-      vi.mocked(fs.cpSync).mock.calls.length +
-        vi.mocked(fs.mkdirSync).mock.calls.length,
+      vi.mocked(fs.cpSync).mock.calls.length + vi.mocked(fs.mkdirSync).mock.calls.length,
     ).toBeGreaterThan(0);
   });
 
@@ -743,22 +830,13 @@ describe("closeBundle hook", () => {
   });
 
   it("uses assetsPath option when copying", async () => {
-    const plugin = await buildPlugin(
-      { assetsPath: "public/cesium" },
-      { command: "build" },
-    );
+    const plugin = await buildPlugin({ assetsPath: "public/cesium" }, { command: "build" });
     plugin.closeBundle();
     // At least one cpSync call should reference our assetsPath.
-    const destArgs = vi
-      .mocked(fs.cpSync)
-      .mock.calls.map(([, dest]) => String(dest));
-    const mkdirArgs = vi
-      .mocked(fs.mkdirSync)
-      .mock.calls.map(([p]) => String(p));
+    const destArgs = vi.mocked(fs.cpSync).mock.calls.map(([, dest]) => String(dest));
+    const mkdirArgs = vi.mocked(fs.mkdirSync).mock.calls.map(([p]) => String(p));
     const allDest = [...destArgs, ...mkdirArgs];
-    expect(allDest.some((d) => d.includes(join("public", "cesium")))).toBe(
-      true,
-    );
+    expect(allDest.some((d) => d.includes(join("public", "cesium")))).toBe(true);
   });
 
   it("emits debug logs for each copy operation when debug: true", async () => {
@@ -789,11 +867,7 @@ describe("configureServer hook", () => {
 
   it("middleware calls next() for unmatched URLs", async () => {
     const plugin = await buildPlugin();
-    let registeredMiddleware!: (
-      req: { url?: string },
-      res: unknown,
-      next: () => void,
-    ) => void;
+    let registeredMiddleware!: (req: { url?: string }, res: unknown, next: () => void) => void;
     const fakeServer = {
       middlewares: {
         use: (fn: typeof registeredMiddleware) => {
@@ -813,11 +887,7 @@ describe("configureServer hook", () => {
     vi.mocked(fs.existsSync).mockImplementation(() => true);
 
     const plugin = await buildPlugin({ assetsPath: "cesium" });
-    let registeredMiddleware!: (
-      req: { url?: string },
-      res: unknown,
-      next: () => void,
-    ) => void;
+    let registeredMiddleware!: (req: { url?: string }, res: unknown, next: () => void) => void;
     const fakeServer = {
       middlewares: {
         use: (fn: typeof registeredMiddleware) => {
@@ -859,12 +929,8 @@ describe("edge cases", () => {
 
   it("Windows-style Ion module path is detected", async () => {
     const plugin = await buildPlugin({ ionToken: FAKE_JWT });
-    const winId =
-      "C:\\project\\node_modules\\@cesium\\engine\\Source\\Core\\Ion.js";
-    const result = plugin.transform(
-      "Ion.defaultAccessToken = defaultAccessToken",
-      winId,
-    );
+    const winId = "C:\\project\\node_modules\\@cesium\\engine\\Source\\Core\\Ion.js";
+    const result = plugin.transform("Ion.defaultAccessToken = defaultAccessToken", winId);
     expect(result).toContain(`Ion.defaultAccessToken = "${FAKE_JWT}"`);
   });
 });

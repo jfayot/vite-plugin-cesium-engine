@@ -1,7 +1,7 @@
 {
-  "cSpell.words": [
-    "jfayot",
-    "Laravel",
-    "uppercased"
-  ]
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "files.autoSave": "off",
+  "cSpell.words": ["jfayot", "Laravel", "uppercased"]
 }

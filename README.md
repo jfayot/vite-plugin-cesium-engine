@@ -25,6 +25,8 @@ What it does for you automatically:
 - ✅ Auto-detects `CESIUM_ION_TOKEN` / `CESIUM_ION_TOKEN_<MODE>` from `.env` files
 - ✅ Exposes `virtual:cesium` and `virtual:cesium/version` modules for typed access to build-time constants
 - ✅ Validates your Ion token format and warns about misconfigurations at startup
+- ✅ Optionally splits Cesium into its own cacheable output chunk
+- ✅ Exposes `virtual:cesium` and `virtual:cesium/version` modules for typed runtime constants
 
 ---
 
@@ -82,6 +84,9 @@ cesiumEngine({
   // Override where assets are copied to in the output dir (default: "cesium")
   assetsPath: "static/cesium",
 
+  // Split @cesium/engine into its own named chunk (optional)
+  chunkName: "vendor-cesium",
+
   // Print what the plugin is doing at startup
   debug: true,
 })
@@ -92,6 +97,7 @@ cesiumEngine({
 | `ionToken` | `string \| Record<string, string> \| (mode) => string \| Promise<string>` | `undefined` | Ion access token. String, per-mode map, or sync/async callback. Omit to auto-read from `.env`. |
 | `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL path from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
+| `chunkName` | `string` | `undefined` | Split `@cesium/engine` into a dedicated output chunk with this name. Omit to bundle Cesium with your app. |
 | `debug` | `boolean` | `false` | Log asset copy targets, resolved token, and base URL at startup. |
 
 ---
@@ -221,6 +227,36 @@ console.log(CESIUM_VERSION); // e.g. "25.0.0"
 
 Useful for logging, bug reports, or conditional behavior when supporting
 multiple Cesium versions in the same codebase.
+
+---
+
+## Splitting Cesium into its own chunk
+
+Use the `chunkName` option to isolate all `@cesium/engine` modules into a dedicated output chunk. This keeps Cesium independently cacheable — a change to your app code won't bust the Cesium bundle in the browser cache.
+
+```ts
+cesiumEngine({ chunkName: "vendor-cesium" })
+```
+
+That's equivalent to manually configuring `manualChunks` in your Rollup output options, but in one place. If you need more control (e.g. combining Cesium with other vendor chunks), the exported `cesiumChunks()` helper is still available:
+
+```ts
+import { cesiumEngine, cesiumChunks } from "vite-plugin-cesium-engine";
+
+export default defineConfig({
+  plugins: [cesiumEngine()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("three")) return "vendor-3d";
+          return cesiumChunks("vendor-cesium");
+        },
+      },
+    },
+  },
+});
+```
 
 ---
 
