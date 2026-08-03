@@ -7,11 +7,10 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@cesium/engine':
-        specifier: '>=11.0.0'
-        version: 25.0.0
     devDependencies:
+      '@cesium/engine':
+        specifier: ^26.1.0
+        version: 26.1.0
       '@changesets/changelog-github':
         specifier: ^0.7.0
         version: 0.7.0
@@ -196,10 +195,6 @@ packages:
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
-
-  '@cesium/engine@25.0.0':
-    resolution: {integrity: sha512-vJZfgAAB7WTvUPsI8dFV+wKleweCZgpJj1ckcTIERnC+NWvJ9bjlAx0xPl0We57NoQKcdMDy+6UiFjOvPB/yGg==}
-    engines: {node: '>=22.0.0'}
 
   '@cesium/engine@26.1.0':
     resolution: {integrity: sha512-WzeJEcmGD7/htBJ8JEZt95OgZjErPwUHqyAlJY/mCzmDm7hfwpuucLBSUhiynWW3khqBT1C7dhibjb7tdic7oA==}
@@ -917,10 +912,6 @@ packages:
   '@vue/shared@3.5.40':
     resolution: {integrity: sha512-WxnBtruIqOoV3rA4jeKDWzrYI5h7Cp4+pjwDi8kWGHz+IslhiN+wguLVVhtv2l8VoU02rzDCVfDjgCl1lNpZVg==}
 
-  '@zip.js/zip.js@2.8.26':
-    resolution: {integrity: sha512-RQ4h9F6DOiHxpdocUDrOl6xBM+yOtz+LkUol47AVWcfebGBDpZ7w7Xvz9PS24JgXvLGiXXzSAfdCdVy1tPlaFA==}
-    engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=18.0.0'}
-
   '@zip.js/zip.js@2.8.34':
     resolution: {integrity: sha512-+6a3lyqq69rpseLbvDPiVIWsZ/HdTGAAD6afFtug6ECPDGttb2dHnPC6cJgdPofYkzL9OvXizegq+DQVfL2rnA==}
     engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=18.0.0'}
@@ -1116,9 +1107,6 @@ packages:
 
   dompurify@3.4.12:
     resolution: {integrity: sha512-zQvGet8Z2sWbQhCmfFz/T5QWH2oBmjnqK3qvOjaqaNLrLEF912WamU+ohnTp0TCep/MFVHpdJuCZEdFOdTnEFg==}
-
-  dompurify@3.4.7:
-    resolution: {integrity: sha512-2jBxDJY4RR06tQNy4w5FlFH7kfxsQZlufd0sbv+chfHCxeJwrFw2baUDsSwvBISD4K4RDbd0PTfy3uNXsR6siA==}
 
   dotenv@8.6.0:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
@@ -1573,9 +1561,6 @@ packages:
   mersenne-twister@1.1.0:
     resolution: {integrity: sha512-mUYWsMKNrm4lfygPkL3OfGzOPTR2DBlTkBNHM//F6hGp8cLThY897crAlk3/Jo17LEOOjQUrNAx6DvgO77QJkA==}
 
-  meshoptimizer@1.1.1:
-    resolution: {integrity: sha512-oRFNWJRDA/WTrVj7NWvqa5HqE1t9MYDj2VaWirQCzCCrAd2GHrqR/sQezCxiWATPNlKTcRaPRHPJwIRoPBAp5g==}
-
   meshoptimizer@1.2.0:
     resolution: {integrity: sha512-davRZeIJbxJrE24cwQle7ZDsxjdk/OphNOV83oX+efQinyoHY9Jcyz3MHbaoG0qySZajldGztNZ1RN/T19PZsg==}
 
@@ -1670,9 +1655,6 @@ packages:
   package-manager-detector@0.2.11:
     resolution: {integrity: sha512-BEnLolu+yuz22S56CU1SUKq3XC3PkwD5wv4ikR4MfGvnRVcmzXR9DwSlW2fEamyTPyXHomBJRzgapeuBvRNzJQ==}
 
-  pako@2.1.0:
-    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
-
   pako@3.0.1:
     resolution: {integrity: sha512-GupotUUI0mlhugKjUs4bjOwLt3nrehy9Ys2dxC0GtgVef5cnKggkDMmf2bq2poCCuVXopWPmqsc9VDT2iJUy+w==}
 
@@ -1744,10 +1726,6 @@ packages:
     resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
     engines: {node: '>=14'}
     hasBin: true
-
-  protobufjs@8.5.0:
-    resolution: {integrity: sha512-df1jWDPA5VIBNRtuAHjqr09f2qN5D4Vke1wYqOQg1XJ7ZDpA7BD6L7E4tyChgGRLB5hqk2m79Zsy0WHwV9a84A==}
-    engines: {node: '>=12.0.0'}
 
   protobufjs@8.7.1:
     resolution: {integrity: sha512-agdGHrXNTv0IrYscJPDou/PlEJk1c/hBZ9o/B5NH2i/nSPtPqacNxzgwf1CebXxFMjMrZH5sqv9uQuw96aGt/A==}
@@ -2191,30 +2169,6 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
-
-  '@cesium/engine@25.0.0':
-    dependencies:
-      '@cesium/wasm-splats': 0.1.0-alpha.2
-      '@spz-loader/core': 0.3.1
-      '@tweenjs/tween.js': 25.0.0
-      '@zip.js/zip.js': 2.8.26
-      autolinker: 4.1.5
-      bitmap-sdf: 1.0.4
-      dompurify: 3.4.7
-      draco3d: 1.5.7
-      earcut: 3.0.2
-      grapheme-splitter: 1.0.4
-      jsep: 1.4.0
-      kdbush: 4.1.0
-      ktx-parse: 1.1.0
-      lerc: 2.0.0
-      mersenne-twister: 1.1.0
-      meshoptimizer: 1.1.1
-      pako: 2.1.0
-      protobufjs: 8.5.0
-      rbush: 4.0.1
-      topojson-client: 3.1.0
-      urijs: 1.19.11
 
   '@cesium/engine@26.1.0':
     dependencies:
@@ -3047,8 +3001,6 @@ snapshots:
 
   '@vue/shared@3.5.40': {}
 
-  '@zip.js/zip.js@2.8.26': {}
-
   '@zip.js/zip.js@2.8.34': {}
 
   acorn-jsx@5.3.2(acorn@8.18.0):
@@ -3199,10 +3151,6 @@ snapshots:
       path-type: 4.0.0
 
   dompurify@3.4.12:
-    optionalDependencies:
-      '@types/trusted-types': 2.0.7
-
-  dompurify@3.4.7:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -3602,8 +3550,6 @@ snapshots:
 
   mersenne-twister@1.1.0: {}
 
-  meshoptimizer@1.1.1: {}
-
   meshoptimizer@1.2.0: {}
 
   micromatch@4.0.8:
@@ -3685,8 +3631,6 @@ snapshots:
     dependencies:
       quansync: 0.2.11
 
-  pako@2.1.0: {}
-
   pako@3.0.1: {}
 
   parent-module@1.0.1:
@@ -3746,10 +3690,6 @@ snapshots:
   prettier@2.8.8: {}
 
   prettier@3.9.6: {}
-
-  protobufjs@8.5.0:
-    dependencies:
-      long: 5.3.2
 
   protobufjs@8.7.1:
     dependencies:
