@@ -37,7 +37,7 @@ vi.mock("node:path", async () => {
 
 // ─── Imports after mocks are set up ──────────────────────────────────────────
 import * as fs from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import type { Plugin, ResolvedConfig, UserConfig, ViteDevServer } from "vite";
 
 // ─── Types re-used across tests ───────────────────────────────────────────────
@@ -63,6 +63,7 @@ function makeResolvedConfig(overrides: Partial<ResolvedConfig> = {}): Partial<Re
     mode: "production",
     command: "build",
     base: "/",
+    root: process.cwd(),
     build: { outDir: "dist" } as ResolvedConfig["build"],
     env: {},
     ...overrides,
@@ -125,7 +126,33 @@ describe("cesiumEngine()", () => {
   it("throws when @cesium/engine is not installed", async () => {
     vi.mocked(fs.existsSync).mockReturnValue(false);
     const { cesiumEngine } = await import("./index.js");
-    expect(() => cesiumEngine()).toThrow(/@cesium\/engine/);
+    const plugin = cesiumEngine() as unknown as PluginWithHooks;
+    expect(() => plugin.configResolved(makeResolvedConfig() as ResolvedConfig)).toThrow(
+      /@cesium\/engine/,
+    );
+  });
+
+  it("resolves @cesium/engine from Vite's root", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine() as unknown as PluginWithHooks;
+    plugin.configResolved(makeResolvedConfig({ root: "/workspace/app" }) as ResolvedConfig);
+
+    expect(fs.existsSync).toHaveBeenCalledWith(
+      resolve("/workspace/app", "node_modules/@cesium/engine"),
+    );
+  });
+
+  it("resolves a relative enginePath from Vite's root", async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      enginePath: "../vendor/cesium-engine",
+    }) as unknown as PluginWithHooks;
+    plugin.configResolved(makeResolvedConfig({ root: "/workspace/app" }) as ResolvedConfig);
+
+    expect(fs.existsSync).toHaveBeenCalledWith(
+      resolve("/workspace/app", "../vendor/cesium-engine"),
+    );
   });
 
   it("falls back to 'unknown' version when package.json cannot be read", async () => {
@@ -837,6 +864,23 @@ describe("closeBundle hook", () => {
     const mkdirArgs = vi.mocked(fs.mkdirSync).mock.calls.map(([p]) => String(p));
     const allDest = [...destArgs, ...mkdirArgs];
     expect(allDest.some((d) => d.includes(join("public", "cesium")))).toBe(true);
+  });
+
+  it("resolves build.outDir from Vite's root", async () => {
+    const plugin = await buildPlugin(
+      {},
+      {
+        command: "build",
+        root: "/workspace/app",
+        build: { outDir: "output" } as ResolvedConfig["build"],
+      },
+    );
+    plugin.closeBundle();
+
+    const destinations = vi
+      .mocked(fs.cpSync)
+      .mock.calls.map(([, destination]) => String(destination));
+    expect(destinations).toContain(resolve("/workspace/app", "output", "cesium"));
   });
 
   it("emits debug logs for each copy operation when debug: true", async () => {

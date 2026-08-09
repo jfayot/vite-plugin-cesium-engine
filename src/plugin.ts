@@ -22,6 +22,7 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
     ionToken: ionTokenConfig,
     cesiumBaseUrl: cesiumBaseUrlOption,
     assetsPath = "cesium",
+    enginePath,
     chunkName,
     debug = false,
   } = options;
@@ -31,27 +32,7 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
   let cesiumBaseUrl: string;
   let resolvedConfig: ResolvedConfig;
   let installedCesiumVersion: string;
-
-  // ── Peer dependency check ───────────────────────────────────────────────────
-  const engineRoot = resolve(process.cwd(), "node_modules/@cesium/engine");
-  if (!existsSync(engineRoot)) {
-    throw new Error(
-      "[cesium-engine] Could not find @cesium/engine in node_modules.\n" +
-        "Install it as a dependency:\n\n" +
-        "  npm i @cesium/engine\n" +
-        "  # or: pnpm add @cesium/engine\n",
-    );
-  }
-
-  // Read installed version from @cesium/engine's own package.json
-  try {
-    const pkgJson = JSON.parse(readFileSync(join(engineRoot, "package.json"), "utf-8")) as {
-      version: string;
-    };
-    installedCesiumVersion = pkgJson.version;
-  } catch {
-    installedCesiumVersion = "unknown";
-  }
+  let engineRoot: string;
 
   return {
     name: "vite-plugin-cesium-engine",
@@ -85,6 +66,30 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       resolvedConfig = cfg;
       const { mode } = cfg;
 
+      // Project-relative paths follow Vite's root, which can differ from the
+      // process working directory in monorepos and programmatic builds.
+      engineRoot = enginePath
+        ? resolve(cfg.root, enginePath)
+        : resolve(cfg.root, "node_modules/@cesium/engine");
+
+      if (!existsSync(engineRoot)) {
+        throw new Error(
+          `[cesium-engine] Could not find @cesium/engine at ${engineRoot}.\n` +
+            "Install it as a dependency or set the enginePath option:\n\n" +
+            "  npm i @cesium/engine\n" +
+            "  # or: pnpm add @cesium/engine\n",
+        );
+      }
+
+      try {
+        const pkgJson = JSON.parse(readFileSync(join(engineRoot, "package.json"), "utf-8")) as {
+          version: string;
+        };
+        installedCesiumVersion = pkgJson.version;
+      } catch {
+        installedCesiumVersion = "unknown";
+      }
+
       // Build CESIUM_BASE_URL: explicit option wins, then derive from Vite base.
       const viteBase = (cfg.base ?? "").replace(/\/$/, "");
       cesiumBaseUrl = cesiumBaseUrlOption
@@ -104,6 +109,7 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
         log(`vite base    : "${viteBase || "(empty)"}"`);
         log(`cesiumBaseUrl: "${cesiumBaseUrl}"`);
         log(`assetsPath   : "${assetsPath}"`);
+        log(`enginePath   : "${engineRoot}"`);
       }
     },
 
@@ -132,7 +138,7 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
     // in both one-shot build and --watch mode.
     closeBundle() {
       if (resolvedConfig.command !== "build") return;
-      const outDir = resolve(process.cwd(), resolvedConfig.build.outDir);
+      const outDir = resolve(resolvedConfig.root, resolvedConfig.build.outDir);
       copyCesiumAssets(engineRoot, outDir, assetsPath, debug);
     },
 

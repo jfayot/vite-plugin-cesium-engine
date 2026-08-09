@@ -42,6 +42,17 @@ export type CesiumEngineOptions = {
   assetsPath?: string;
 
   /**
+   * Path to the `@cesium/engine` package directory. Relative paths are
+   * resolved from Vite's configured `root`.
+   *
+   * Use this when the package is installed in a non-standard location, such
+   * as a workspace-managed or vendored dependency directory.
+   *
+   * @default "node_modules/@cesium/engine"
+   */
+  enginePath?: string;
+
+  /**
    * Split `@cesium/engine` into a dedicated output chunk with this name,
    * keeping it independently cacheable from your app code.
    *
