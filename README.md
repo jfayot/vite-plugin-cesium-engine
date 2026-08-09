@@ -84,6 +84,9 @@ cesiumEngine({
   // Override where assets are copied to in the output dir (default: "cesium")
   assetsPath: "static/cesium",
 
+  // Override the @cesium/engine package directory (relative to Vite's root)
+  enginePath: "../vendor/cesium-engine",
+
   // Split @cesium/engine into its own named chunk (optional)
   chunkName: "vendor-cesium",
 
@@ -97,6 +100,7 @@ cesiumEngine({
 | `ionToken` | `string \| Record<string, string> \| (mode) => string \| Promise<string>` | `undefined` | Ion access token. String, per-mode map, or sync/async callback. Omit to auto-read from `.env`. |
 | `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL path from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
+| `enginePath` | `string` | `"node_modules/@cesium/engine"` | Package directory, resolved relative to Vite's `root`. Absolute paths are also supported. |
 | `chunkName` | `string` | `undefined` | Split `@cesium/engine` into a dedicated output chunk with this name. Omit to bundle Cesium with your app. |
 | `debug` | `boolean` | `false` | Log asset copy targets, resolved token, and base URL at startup. |
 
