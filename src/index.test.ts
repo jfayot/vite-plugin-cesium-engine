@@ -880,9 +880,7 @@ describe("closeBundle hook", () => {
     const destinations = vi
       .mocked(fs.cpSync)
       .mock.calls.map(([, destination]) => String(destination));
-    expect(
-      destinations.some((destination) => destination.startsWith("/workspace/app/output")),
-    ).toBe(true);
+    expect(destinations).toContain(resolve("/workspace/app", "output", "cesium"));
   });
 
   it("emits debug logs for each copy operation when debug: true", async () => {
