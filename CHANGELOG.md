@@ -1,5 +1,11 @@
 # vite-plugin-cesium-engine
 
+## 1.9.0
+
+### Minor Changes
+
+- [#167](https://github.com/jfayot/vite-plugin-cesium-engine/pull/167) [`7ae2d78`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/7ae2d7846c1c400cd057f8d11b190a7255e22371) Thanks [@jfayot](https://github.com/jfayot)! - Resolve the Cesium package and build output paths relative to Vite's configured root, and add an `enginePath` option for non-standard package locations.
+
 ## 1.8.0
 
 ### Minor Changes
