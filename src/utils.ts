@@ -22,6 +22,12 @@ export function normalizePath(raw: string): string {
   return "/" + raw.slice(start, end);
 }
 
+/** Normalize a local path or absolute HTTP(S) asset URL without a trailing slash. */
+export function normalizeBaseUrl(raw: string): string {
+  if (/^https?:\/\//i.test(raw)) return raw.replace(/\/+$/, "");
+  return normalizePath(raw);
+}
+
 // ─── Module detection ─────────────────────────────────────────────────────────
 
 // Detect the Ion module by plain substring checks. The ID can take three forms:

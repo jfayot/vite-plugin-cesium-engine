@@ -26,6 +26,7 @@ What it does for you automatically:
 - ✅ Exposes `virtual:cesium` and `virtual:cesium/version` modules for typed access to build-time constants
 - ✅ Validates your Ion token format and warns about misconfigurations at startup
 - ✅ Optionally splits Cesium into its own cacheable output chunk
+- ✅ Supports externally hosted or CDN-hosted Cesium assets without copying them
 - ✅ Exposes `virtual:cesium` and `virtual:cesium/version` modules for typed runtime constants
 
 ---
@@ -75,11 +76,17 @@ const widget = new CesiumWidget(document.getElementById("cesium-container")!);
 
 ```ts
 cesiumEngine({
+  // Use assets hosted outside this build instead of copying them to dist
+  assets: "external",
+
   // Ion token — string, per-environment map, sync/async callback, or omit to auto-read from .env
   ionToken: "eyJhbGci...",
 
   // Override where assets are served from (default: derived from Vite's base)
   cesiumBaseUrl: "/static/cesium",
+
+  // Override the injected CesiumWidget stylesheet URL
+  widgetCssUrl: "/styles/CesiumWidget.css",
 
   // Override where assets are copied to in the output dir (default: "cesium")
   assetsPath: "static/cesium",
@@ -97,8 +104,10 @@ cesiumEngine({
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
+| `assets` | `"copy" \| "external"` | `"copy"` | Copy and locally serve Cesium assets, or use externally hosted assets. External mode requires `cesiumBaseUrl`. |
 | `ionToken` | `string \| Record<string, string> \| (mode) => string \| Promise<string>` | `undefined` | Ion access token. String, per-mode map, or sync/async callback. Omit to auto-read from `.env`. |
-| `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL path from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
+| `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
+| `widgetCssUrl` | `string` | `"${cesiumBaseUrl}/Widget/CesiumWidget.css"` | URL of the injected CesiumWidget stylesheet. Useful when an external CDN has a different layout. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
 | `enginePath` | `string` | `"node_modules/@cesium/engine"` | Package directory, resolved relative to Vite's `root`. Absolute paths are also supported. |
 | `chunkName` | `string` | `undefined` | Split `@cesium/engine` into a dedicated output chunk with this name. Omit to bundle Cesium with your app. |
@@ -285,6 +294,32 @@ export default defineConfig({
 The plugin will warn you at startup if `cesiumBaseUrl` doesn't start with
 Vite's `base`, which would cause assets to resolve incorrectly.
 
+### External or CDN-hosted assets
+
+Set `assets` to `"external"` when Cesium assets are deployed independently.
+The plugin will not copy assets into `dist` or register local asset middleware
+in the Vite development server. Bundling, the base URL define, widget CSS link,
+Ion token handling, and virtual modules continue to work normally.
+
+```ts
+cesiumEngine({
+  assets: "external",
+  cesiumBaseUrl:
+    "https://cdn.jsdelivr.net/npm/cesium@1.144.0/Build/Cesium",
+  widgetCssUrl:
+    "https://cdn.jsdelivr.net/npm/@cesium/engine@26.2.0/Source/Widget/CesiumWidget.css",
+})
+```
+
+The full `cesium` package provides the `Assets`, `ThirdParty`, and `Workers`
+directories under one CDN base. Its version must match the installed engine;
+for example, CesiumJS 1.144 depends on `@cesium/engine` 26.2. Pin both URLs so a
+future CDN release cannot become incompatible with the application bundle.
+
+For a custom CDN, `cesiumBaseUrl` must contain the same runtime asset layout
+normally emitted by the plugin. When it also contains
+`Widget/CesiumWidget.css`, `widgetCssUrl` can be omitted.
+
 ---
 
 ## Debug mode
@@ -314,7 +349,8 @@ Complete, ready-to-run starter projects are available in the [`examples/`](./exa
 | [`examples/react`](./examples/react) | React 19 + TypeScript | `useEffect` lifecycle, HMR-safe widget init |
 | [`examples/vue`](./examples/vue) | Vue 3 + TypeScript | Composition API, `onMounted` / `onBeforeUnmount` |
 | [`examples/svelte`](./examples/svelte) | Svelte 5 + TypeScript | `onMount` with return-value cleanup |
-| [`examples/vanilla`](./examples/vanilla) | Vanilla TypeScript | Zero framework, `import.meta.hot` HMR cleanup |
+| [`examples/vanilla-ts`](./examples/vanilla-ts) | Vanilla TypeScript | Zero framework, `import.meta.hot` HMR cleanup |
+| [`examples/vanilla-ts-external`](./examples/vanilla-ts-external) | Vanilla TypeScript | Version-pinned jsDelivr assets using external mode |
 
 Each example includes all project files and can be run with:
 
@@ -323,6 +359,7 @@ pnpm install
 pnpm dev:react
 pnpm dev:svelte
 pnpm dev:vanilla-ts
+pnpm dev:vanilla-ts-external
 pnpm dev:vue
 ```
 

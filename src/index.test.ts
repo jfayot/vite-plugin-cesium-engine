@@ -173,6 +173,21 @@ describe("cesiumEngine()", () => {
 // ═════════════════════════════════════════════════════════════════════════════
 
 describe("config hook", () => {
+  it("requires cesiumBaseUrl in external asset mode", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    expect(() => cesiumEngine({ assets: "external" })).toThrow(/cesiumBaseUrl/);
+  });
+
+  it("preserves an absolute CDN URL in external asset mode", async () => {
+    const { cesiumEngine } = await import("./index.js");
+    const plugin = cesiumEngine({
+      assets: "external",
+      cesiumBaseUrl: "https://cdn.example.com/cesium/26.1.0/",
+    }) as unknown as PluginWithHooks;
+    const result = plugin.config({ base: "/app/" });
+    expect(result?.define?.["CESIUM_BASE_URL"]).toBe('"https://cdn.example.com/cesium/26.1.0/"');
+  });
+
   it("injects CESIUM_BASE_URL define with default path /cesium/", async () => {
     const { cesiumEngine } = await import("./index.js");
     const plugin = cesiumEngine() as unknown as PluginWithHooks;
@@ -245,8 +260,7 @@ describe("config hook — chunkName option", () => {
     }) as unknown as PluginWithHooks;
     const result = plugin.config({ base: "/" });
     const output = result?.build?.rollupOptions?.output as
-      | { manualChunks?: (id: string) => string | undefined }
-      | undefined;
+      { manualChunks?: (id: string) => string | undefined } | undefined;
     expect(typeof output?.manualChunks).toBe("function");
   });
 
@@ -833,6 +847,19 @@ describe("transformIndexHtml hook", () => {
     const [tag] = plugin.transformIndexHtml();
     expect(tag.attrs["href"]).toContain("/my-cesium/Widget/CesiumWidget.css");
   });
+
+  it("uses a custom widgetCssUrl", async () => {
+    const plugin = await buildPlugin({
+      assets: "external",
+      cesiumBaseUrl: "https://cdn.jsdelivr.net/npm/cesium@1.144.0/Build/Cesium",
+      widgetCssUrl:
+        "https://cdn.jsdelivr.net/npm/@cesium/engine@26.2.0/Source/Widget/CesiumWidget.css",
+    });
+    const [tag] = plugin.transformIndexHtml();
+    expect(tag.attrs["href"]).toBe(
+      "https://cdn.jsdelivr.net/npm/@cesium/engine@26.2.0/Source/Widget/CesiumWidget.css",
+    );
+  });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -840,6 +867,16 @@ describe("transformIndexHtml hook", () => {
 // ═════════════════════════════════════════════════════════════════════════════
 
 describe("closeBundle hook", () => {
+  it("does NOT copy assets in external mode", async () => {
+    const plugin = await buildPlugin(
+      { assets: "external", cesiumBaseUrl: "https://cdn.example.com/cesium" },
+      { command: "build" },
+    );
+    plugin.closeBundle();
+    expect(vi.mocked(fs.cpSync)).not.toHaveBeenCalled();
+    expect(vi.mocked(fs.mkdirSync)).not.toHaveBeenCalled();
+  });
+
   it("copies Cesium assets when command is 'build'", async () => {
     const plugin = await buildPlugin({}, { command: "build" });
     plugin.closeBundle();
@@ -898,6 +935,17 @@ describe("closeBundle hook", () => {
 // ═════════════════════════════════════════════════════════════════════════════
 
 describe("configureServer hook", () => {
+  it("does NOT register middleware in external mode", async () => {
+    const plugin = await buildPlugin({
+      assets: "external",
+      cesiumBaseUrl: "https://cdn.example.com/cesium",
+    });
+    const useSpy = vi.fn();
+    const fakeServer = { middlewares: { use: useSpy } } as unknown as ViteDevServer;
+    plugin.configureServer(fakeServer);
+    expect(useSpy).not.toHaveBeenCalled();
+  });
+
   it("registers a middleware on the dev server", async () => {
     const plugin = await buildPlugin();
     const useSpy = vi.fn();

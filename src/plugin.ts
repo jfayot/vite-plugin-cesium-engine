@@ -9,7 +9,7 @@ import {
   virtualCesiumSource,
   virtualVersionSource,
 } from "./virtual.js";
-import { isIonModule, log, normalizePath, warn } from "./utils.js";
+import { isIonModule, log, normalizeBaseUrl, warn } from "./utils.js";
 import { copyCesiumAssets, registerDevServerMiddleware } from "./assets.js";
 import { logResolvedToken, resolveToken, validateToken } from "./token.js";
 import { type CesiumEngineOptions } from "./types.js";
@@ -20,12 +20,20 @@ import { cesiumChunks } from "./chunks.js";
 export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
   const {
     ionToken: ionTokenConfig,
+    assets = "copy",
     cesiumBaseUrl: cesiumBaseUrlOption,
+    widgetCssUrl: widgetCssUrlOption,
     assetsPath = "cesium",
     enginePath,
     chunkName,
     debug = false,
   } = options;
+
+  if (assets === "external" && !cesiumBaseUrlOption) {
+    throw new Error(
+      '[cesium-engine] `cesiumBaseUrl` is required when `assets` is set to "external".',
+    );
+  }
 
   let activeToken: string | undefined;
   // Final URL exposed to the browser (and to `virtual:cesium`).
@@ -42,7 +50,7 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
     config(userConfig) {
       const viteBase = (userConfig.base ?? "").replace(/\/$/, "");
       const resolvedCesiumBaseUrl = cesiumBaseUrlOption
-        ? normalizePath(cesiumBaseUrlOption)
+        ? normalizeBaseUrl(cesiumBaseUrlOption)
         : `${viteBase}/${assetsPath}`;
 
       return {
@@ -93,11 +101,16 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       // Build CESIUM_BASE_URL: explicit option wins, then derive from Vite base.
       const viteBase = (cfg.base ?? "").replace(/\/$/, "");
       cesiumBaseUrl = cesiumBaseUrlOption
-        ? normalizePath(cesiumBaseUrlOption)
+        ? normalizeBaseUrl(cesiumBaseUrlOption)
         : `${viteBase}/${assetsPath}`;
 
       // Warn when Vite's base and an explicit cesiumBaseUrl look inconsistent.
-      if (cesiumBaseUrlOption && viteBase && !cesiumBaseUrl.startsWith(viteBase)) {
+      if (
+        assets === "copy" &&
+        cesiumBaseUrlOption &&
+        viteBase &&
+        !cesiumBaseUrl.startsWith(viteBase)
+      ) {
         warn(
           `cesiumBaseUrl ("${cesiumBaseUrl}") does not start with Vite's ` +
             `base ("${viteBase}"). Assets may not resolve correctly.`,
@@ -109,12 +122,14 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
         log(`vite base    : "${viteBase || "(empty)"}"`);
         log(`cesiumBaseUrl: "${cesiumBaseUrl}"`);
         log(`assetsPath   : "${assetsPath}"`);
+        log(`assets       : "${assets}"`);
         log(`enginePath   : "${engineRoot}"`);
       }
     },
 
     // ── Dev server: serve Cesium assets directly from node_modules ────────
     configureServer(server) {
+      if (assets === "external") return;
       registerDevServerMiddleware(server, engineRoot, assetsPath);
     },
 
@@ -138,6 +153,7 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
     // in both one-shot build and --watch mode.
     closeBundle() {
       if (resolvedConfig.command !== "build") return;
+      if (assets === "external") return;
       const outDir = resolve(resolvedConfig.root, resolvedConfig.build.outDir);
       copyCesiumAssets(engineRoot, outDir, assetsPath, debug);
     },
@@ -195,7 +211,9 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
           injectTo: "head" as const,
           attrs: {
             rel: "stylesheet",
-            href: `${cesiumBaseUrl}/Widget/CesiumWidget.css`,
+            href: widgetCssUrlOption
+              ? normalizeBaseUrl(widgetCssUrlOption)
+              : `${cesiumBaseUrl}/Widget/CesiumWidget.css`,
           },
         },
       ];
