@@ -1,5 +1,15 @@
 # vite-plugin-cesium-engine
 
+## 1.10.0
+
+### Minor Changes
+
+- [`94cc6be`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/94cc6be42c21c5331af5c7c6c517714a217bf794) Thanks [@jfayot](https://github.com/jfayot)! - Add an external asset mode for CDN-hosted Cesium assets. Setting `assets` to
+  `"external"` now skips build-time asset copying and local development
+  middleware while preserving absolute HTTP(S) `cesiumBaseUrl` values.
+  Add `widgetCssUrl` so the injected stylesheet can use a different CDN path,
+  including the native npm package layout.
+
 ## 1.9.0
 
 ### Minor Changes
