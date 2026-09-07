@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@cesium/engine": "26.2.0"
+    "@cesium/engine": "26.3.0"
   },
   "devDependencies": {
     "rimraf": "^6.1.3",
