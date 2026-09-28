@@ -22,7 +22,7 @@ importers:
         version: 21.2.2(@types/node@26.4.1)(conventional-commits-parser@7.1.2)(typescript@7.0.2)
       '@commitlint/config-conventional':
         specifier: ^21.2.0
-        version: 21.2.2
+        version: 21.2.3
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.6.1))
@@ -306,8 +306,8 @@ packages:
     engines: {node: '>=22.12.0'}
     hasBin: true
 
-  '@commitlint/config-conventional@21.2.2':
-    resolution: {integrity: sha512-NxA37SZviusFUEYOQZ5hNnZ1h7O/KiemPkxjOlpzKJNnWxThiwc6/SaZhaPa8fyLvfRBAywhQhJJk8XESHWlpQ==}
+  '@commitlint/config-conventional@21.2.3':
+    resolution: {integrity: sha512-EP2n5DN2GwRWNVrLX0Jx3mpQlW5PfFi9HnD9OJ8hN/H0xFqpCFyHeGDhg+0P8/21iMMcdkcQgbNqmVklebqYsQ==}
     engines: {node: '>=22.12.0'}
 
   '@commitlint/config-validator@21.2.0':
@@ -368,6 +368,10 @@ packages:
 
   '@commitlint/types@21.2.0':
     resolution: {integrity: sha512-7zVFCDB2reMvJH5dmbKnOQPjZEvjdJTH8jc0U/PIPU1r3/+vf5pD1HlfitV2MWsWXrvu7u39iY1lyLUPOaN0Gw==}
+    engines: {node: '>=22.12.0'}
+
+  '@commitlint/types@21.2.3':
+    resolution: {integrity: sha512-sGEA473TlCvhCGNoTBY9OXZVWdscIXdGt0dm8EpB+2MRfmt8LNh/X56P/T3nCtEB+eH5qGEa3odphSAoUxSfSQ==}
     engines: {node: '>=22.12.0'}
 
   '@conventional-changelog/git-client@3.1.2':
@@ -887,14 +891,8 @@ packages:
       typescript:
         optional: true
 
-  '@vue/compiler-core@3.5.42':
-    resolution: {integrity: sha512-2Ye1ilMtKXxl8qZUrQ5j0CdgenFp/HFQmta6rfRyfEsTG69L6Wk+tWuNoHYHMx9E8tF2Slvdg1FuwDvAXdy1LQ==}
-
   '@vue/compiler-core@3.5.43':
     resolution: {integrity: sha512-zdiLhnbe1QQqgDT8xZMpNmyqZ3qlI+/Q/FHQco57Kwl/b05HhCzN6eVGN9QU9rbga4CrS0H5SYY8VGHZCt/1Hg==}
-
-  '@vue/compiler-dom@3.5.42':
-    resolution: {integrity: sha512-qbhQZEFmycr+ni/qyuccS4sucNN7VAbDfbkvNxWOX2VfgFm90MNs3/UhRNKoPMEIVn0F8gdlYjLPvqxHwHeQOA==}
 
   '@vue/compiler-dom@3.5.43':
     resolution: {integrity: sha512-PEZoAk3NQmsn/ejMzSOCyTYqwGqczrWm70PuhBKjjv1+TCoQAaO/zOqNwjV+honlNstT5ILxtc+8r8UUfj+iEQ==}
@@ -919,9 +917,6 @@ packages:
 
   '@vue/server-renderer@3.5.43':
     resolution: {integrity: sha512-l2Ygjv9NehV94PSBxNWsAHC0j/eIIKbn92mBuWXAPGLnn6HfJ6MH5ubsd+Nk0YoZ5FRuxWI1P2VSoh+dbPQhCQ==}
-
-  '@vue/shared@3.5.42':
-    resolution: {integrity: sha512-2rPxex1jQf4jvl9MOHl6YaXCPcrNqz/FstMOEh3QWY+/OME9nQTvl9WYeCwhW7AFjaR0SnngZGlp/wkR6rkI6g==}
 
   '@vue/shared@3.5.43':
     resolution: {integrity: sha512-uksS7YGMR5NZyr4JNq0Rp+QyLns0ueaz20KwzIPW9R0LH1Vnt4E+XUM29PNseEbf1www2gOuhuDi5AKOIXag9Q==}
@@ -2159,7 +2154,7 @@ snapshots:
 
   '@commitlint/cli@21.2.2(@types/node@26.4.1)(conventional-commits-parser@7.1.2)(typescript@7.0.2)':
     dependencies:
-      '@commitlint/config-conventional': 21.2.2
+      '@commitlint/config-conventional': 21.2.3
       '@commitlint/format': 21.2.2
       '@commitlint/lint': 21.2.2
       '@commitlint/load': 21.2.2(@types/node@26.4.1)(typescript@7.0.2)
@@ -2173,9 +2168,9 @@ snapshots:
       - conventional-commits-parser
       - typescript
 
-  '@commitlint/config-conventional@21.2.2':
+  '@commitlint/config-conventional@21.2.3':
     dependencies:
-      '@commitlint/types': 21.2.0
+      '@commitlint/types': 21.2.3
       conventional-changelog-conventionalcommits: 10.4.0
 
   '@commitlint/config-validator@21.2.0':
@@ -2262,6 +2257,11 @@ snapshots:
       escalade: 3.2.0
 
   '@commitlint/types@21.2.0':
+    dependencies:
+      conventional-commits-parser: 7.1.2
+      picocolors: 1.1.1
+
+  '@commitlint/types@21.2.3':
     dependencies:
       conventional-commits-parser: 7.1.2
       picocolors: 1.1.1
@@ -2675,14 +2675,6 @@ snapshots:
     optionalDependencies:
       typescript: 7.0.2
 
-  '@vue/compiler-core@3.5.42':
-    dependencies:
-      '@babel/parser': 7.29.8
-      '@vue/shared': 3.5.42
-      entities: 7.0.1
-      estree-walker: 2.0.2
-      source-map-js: 1.2.1
-
   '@vue/compiler-core@3.5.43':
     dependencies:
       '@babel/parser': 7.29.8
@@ -2690,11 +2682,6 @@ snapshots:
       entities: 7.0.1
       estree-walker: 2.0.2
       source-map-js: 1.2.1
-
-  '@vue/compiler-dom@3.5.42':
-    dependencies:
-      '@vue/compiler-core': 3.5.42
-      '@vue/shared': 3.5.42
 
   '@vue/compiler-dom@3.5.43':
     dependencies:
@@ -2721,8 +2708,8 @@ snapshots:
   '@vue/language-core@3.3.11':
     dependencies:
       '@volar/language-core': 2.4.28
-      '@vue/compiler-dom': 3.5.42
-      '@vue/shared': 3.5.42
+      '@vue/compiler-dom': 3.5.43
+      '@vue/shared': 3.5.43
       alien-signals: 3.2.1
       muggle-string: 0.4.1
       path-browserify: 1.0.1
@@ -2749,8 +2736,6 @@ snapshots:
       '@vue/compiler-ssr': 3.5.43
       '@vue/runtime-dom': 3.5.43
       '@vue/shared': 3.5.43
-
-  '@vue/shared@3.5.42': {}
 
   '@vue/shared@3.5.43': {}
 
