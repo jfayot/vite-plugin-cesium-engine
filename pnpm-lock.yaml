@@ -58,7 +58,7 @@ importers:
         version: 8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0)
       vite-plugin-dts:
         specifier: ^5.0.3
-        version: 5.1.0(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0))
+        version: 5.1.2(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0))
       vitest:
         specifier: ^5.0.0
         version: 5.0.1(@types/node@26.6.5)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0))
@@ -1758,8 +1758,8 @@ packages:
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
-  unplugin-dts@1.1.0:
-    resolution: {integrity: sha512-KZJ+qk+lmd9dJY/PJvDRFL9BUtVubKDiX7Ai/X6mlkCArcQNzwmupKjVqHbRA42uqO5ZfFRFc+o8/OCbQ1GonQ==}
+  unplugin-dts@1.1.2:
+    resolution: {integrity: sha512-RDqy90XUmFj6rz4U5YoTMdYdaCJe2ZnQZaWIjkWS4952Gv0zBTQyqWtlGgVMPYHa982dURvyoc+sUOFIcDFv+w==}
     peerDependencies:
       '@microsoft/api-extractor': '>=7'
       '@rspack/core': ^1
@@ -1798,8 +1798,8 @@ packages:
   urijs@1.19.11:
     resolution: {integrity: sha512-HXgFDgDommxn5/bIv0cnQZsPhHDA90NPHD6+c/v21U5+Sx5hoP8+dP9IZXBU1gIfvdRfhG8cel9QNPeionfcCQ==}
 
-  vite-plugin-dts@5.1.0:
-    resolution: {integrity: sha512-MfLc2G+mXPUDGGxpHQeYbdunavFP9UpT9yxiAsTgUXRxfEd3HqysSAM4E72jhz5eIz3OOexCHkqiVlQq8ok9/A==}
+  vite-plugin-dts@5.1.2:
+    resolution: {integrity: sha512-1bXUz836sWq6ewEMQre3ZtNFVfZk/92DppgCCKP8tWx/NWwV2wHuXlRHb2TztHjbikPxvyAGLGu7hVh94Plwww==}
     peerDependencies:
       '@microsoft/api-extractor': '>=7'
       rollup: '>=3'
@@ -3492,7 +3492,7 @@ snapshots:
 
   undici-types@8.9.0: {}
 
-  unplugin-dts@1.1.0(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0)):
+  unplugin-dts@1.1.2(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0)):
     dependencies:
       '@rollup/pluginutils': 5.4.0
       '@volar/typescript': 2.4.28(typescript@7.0.2)
@@ -3524,9 +3524,9 @@ snapshots:
 
   urijs@1.19.11: {}
 
-  vite-plugin-dts@5.1.0(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0)):
+  vite-plugin-dts@5.1.2(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0)):
     dependencies:
-      unplugin-dts: 1.1.0(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0))
+      unplugin-dts: 1.1.2(@vue/language-core@3.3.11)(rolldown@1.2.14)(typescript@7.0.2)(vite@8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0))
     optionalDependencies:
       vite: 8.3.5(@types/node@26.6.5)(jiti@2.6.1)(yaml@2.9.0)
     transitivePeerDependencies:
