@@ -17,7 +17,8 @@ let workspace: string;
 let root: string;
 
 beforeEach(() => {
-  workspace = realpathSync(mkdtempSync(join(tmpdir(), "cesium-discovery-")));
+  // Vite's Windows /@fs serving requires fixtures on the checkout's drive.
+  workspace = realpathSync(mkdtempSync(join(process.cwd(), "node_modules/.cesium-discovery-")));
   root = join(workspace, "packages/map app/src");
   mkdirSync(root, { recursive: true });
   writeFileSync(
@@ -135,8 +136,18 @@ describe("automatic engine discovery", () => {
   });
 
   it("reports a missing engine instead of resolving the plugin's own dependency", async () => {
-    await expect(
-      build({ root, configFile: false, logLevel: "silent", plugins: [cesiumEngine()] }),
-    ).rejects.toThrow("Could not find @cesium/engine");
+    const isolatedRoot = mkdtempSync(join(tmpdir(), "cesium-missing-"));
+    try {
+      await expect(
+        build({
+          root: isolatedRoot,
+          configFile: false,
+          logLevel: "silent",
+          plugins: [cesiumEngine()],
+        }),
+      ).rejects.toThrow("Could not find @cesium/engine");
+    } finally {
+      rmSync(isolatedRoot, { recursive: true, force: true });
+    }
   });
 });
