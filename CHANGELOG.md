@@ -1,5 +1,13 @@
 # vite-plugin-cesium-engine
 
+## 1.12.0
+
+### Minor Changes
+
+- [#247](https://github.com/jfayot/vite-plugin-cesium-engine/pull/247) [`9658f43`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/9658f43526eb44fb6d39d6ba06660102a5c200d2) Thanks [@jfayot](https://github.com/jfayot)! - Discover `@cesium/engine` using Node package resolution from Vite's root,
+  supporting nested source roots, hoisted dependencies, and pnpm workspace
+  symlinks. Explicit `enginePath` values continue to override discovery.
+
 ## 1.11.1
 
 ### Patch Changes
