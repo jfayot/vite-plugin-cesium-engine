@@ -396,6 +396,17 @@ pnpm exec tsc --noEmit
 pnpm build:all
 ```
 
+Run the Chromium smoke test after installing its browser:
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:browser
+```
+
+It renders an offline globe and worker-created geometry in development and
+production preview under `/app/`, checking pixels, CSS, and asset failures.
+The browser test runs on Linux CI.
+
 The compatibility tests build against the current engine and a pinned 26.2.0
 test dependency from before the core split. They also request workers, WASM,
 assets, and CSS from a real Vite dev server under `/app/`.

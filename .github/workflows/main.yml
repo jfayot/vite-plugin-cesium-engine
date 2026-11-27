@@ -33,3 +33,9 @@ jobs:
       - run: pnpm exec tsc --noEmit
       - run: pnpm test
       - run: pnpm build:all
+      - name: Install Chromium
+        if: runner.os == 'Linux'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Browser smoke tests
+        if: runner.os == 'Linux'
+        run: pnpm test:browser
