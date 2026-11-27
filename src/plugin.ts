@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve, join } from "node:path";
-import type { Plugin, ResolvedConfig } from "vite";
+import { loadEnv, type Plugin, type ResolvedConfig } from "vite";
 import {
   RESOLVED_VIRTUAL_CESIUM_ID,
   RESOLVED_VIRTUAL_VERSION_ID,
@@ -135,7 +135,12 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
 
     // ── buildStart: resolve async token ───────────────────────────────────
     async buildStart() {
-      const { mode, env } = resolvedConfig;
+      const { mode, envDir } = resolvedConfig;
+      // Resolved env only contains variables matching Vite's client envPrefix.
+      const env = {
+        ...loadEnv(mode, envDir, "CESIUM_ION_TOKEN"),
+        ...resolvedConfig.env,
+      };
 
       activeToken = await resolveToken(ionTokenConfig, mode, env);
 
