@@ -71,10 +71,10 @@ export type CesiumEngineOptions = {
    * Path to the `@cesium/engine` package directory. Relative paths are
    * resolved from Vite's configured `root`.
    *
-   * Use this when the package is installed in a non-standard location, such
-   * as a workspace-managed or vendored dependency directory.
+   * Overrides automatic Node package resolution from Vite's root. Use this
+   * for a vendored engine or another custom package location.
    *
-   * @default "node_modules/@cesium/engine"
+   * @default resolved automatically from Vite's root
    */
   enginePath?: string;
 

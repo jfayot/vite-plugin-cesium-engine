@@ -125,9 +125,27 @@ cesiumEngine({
 | `cesiumBaseUrl` | `string` | `"/${assetsPath}"` | URL from which Cesium assets are served. Defaults to Vite's `base` + `assetsPath`. |
 | `widgetCssUrl` | `string` | `"${cesiumBaseUrl}/Widget/CesiumWidget.css"` | URL of the injected CesiumWidget stylesheet. Useful when an external CDN has a different layout. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
-| `enginePath` | `string` | `"node_modules/@cesium/engine"` | Package directory, resolved relative to Vite's `root`. Absolute paths are also supported. |
+| `enginePath` | `string` | auto-detected | Override the engine package directory. Relative paths resolve from Vite's `root`; absolute paths are also supported. |
 | `chunkName` | `string` | `undefined` | Split `@cesium/engine`, `@cesium/core`, and `@cesium/gltf` into a dedicated output chunk with this name. Omit to bundle Cesium with your app. |
 | `debug` | `boolean` | `false` | Log asset copy targets, resolved token, and base URL at startup. |
+
+---
+
+## Automatic package discovery
+
+The plugin finds the nearest installed `@cesium/engine` using Node package
+resolution from Vite's `root`. Nested roots, hoisted workspace dependencies,
+and pnpm package symlinks work without an `enginePath` override:
+
+```ts
+export default defineConfig({
+  root: "src",
+  plugins: [cesiumEngine()],
+});
+```
+
+Set `enginePath` to select a vendored engine or another custom package directory.
+An explicit path always takes priority over discovery.
 
 ---
 
@@ -395,6 +413,17 @@ pnpm lint:ci
 pnpm exec tsc --noEmit
 pnpm build:all
 ```
+
+Run the Chromium smoke test after installing its browser:
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:browser
+```
+
+It renders an offline globe and worker-created geometry in development and
+production preview under `/app/`, checking pixels, CSS, and asset failures.
+The browser test runs on Linux CI.
 
 The compatibility tests build against the current engine and a pinned 26.2.0
 test dependency from before the core split. They also request workers, WASM,

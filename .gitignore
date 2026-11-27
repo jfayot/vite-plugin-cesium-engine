@@ -3,3 +3,5 @@ dist
 lint.html
 **/lint.html
 .DS_Store
+playwright-report
+test-results

@@ -19,6 +19,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("vite", () => ({ loadEnv: vi.fn(() => ({})) }));
 
+vi.mock("node:module", () => ({
+  createRequire: vi.fn((filename: string) => ({
+    resolve: (specifier: string) => resolve(dirname(filename), "node_modules", specifier),
+  })),
+}));
+
 // ─── Mock node:fs ─────────────────────────────────────────────────────────────
 vi.mock("node:fs", () => ({
   existsSync: vi.fn(() => true),
@@ -39,7 +45,7 @@ vi.mock("node:path", async () => {
 
 // ─── Imports after mocks are set up ──────────────────────────────────────────
 import * as fs from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import type { Plugin, ResolvedConfig, UserConfig, ViteDevServer } from "vite";
 
 // ─── Types re-used across tests ───────────────────────────────────────────────
