@@ -276,6 +276,12 @@ describe("config hook — chunkName option", () => {
     expect(output.manualChunks("/project/node_modules/@cesium/engine/Source/Core/Ion.js")).toBe(
       "vendor-cesium",
     );
+    expect(output.manualChunks("/project/node_modules/@cesium/core/Source/Cartesian3.js")).toBe(
+      "vendor-cesium",
+    );
+    expect(output.manualChunks("/project/node_modules/@cesium/gltf/index.js")).toBe(
+      "vendor-cesium",
+    );
   });
 
   it("manualChunks returns the configured chunkName for Windows-style @cesium\\engine paths", async () => {
@@ -345,11 +351,25 @@ describe("cesiumChunks()", () => {
     );
   });
 
-  it("returns undefined for ids that do not include @cesium/engine", async () => {
+  it.each([
+    "@cesium/core",
+    "/project/node_modules/@cesium/core/Source/Cartesian3.js",
+    "/project/node_modules/.pnpm/@cesium+core@0.1.1/node_modules/@cesium/core/index.js",
+    "C:\\project\\node_modules\\@cesium\\core\\Source\\Cartesian3.js",
+    "@cesium/gltf/index.js",
+    "C:\\project\\node_modules\\@cesium\\gltf\\index.js",
+  ])("includes split Cesium package: %s", async (id) => {
+    const { cesiumChunks } = await import("./index.js");
+    expect(cesiumChunks("vendor-cesium")(id)).toBe("vendor-cesium");
+  });
+
+  it("returns undefined for unrelated modules and similarly named packages", async () => {
     const { cesiumChunks } = await import("./index.js");
     const fn = cesiumChunks("vendor-cesium");
     expect(fn("/project/src/components/Map.tsx")).toBeUndefined();
     expect(fn("/project/node_modules/react/index.js")).toBeUndefined();
+    expect(fn("/project/node_modules/@cesium/core-extra/index.js")).toBeUndefined();
+    expect(fn("/project/node_modules/@cesium/engine-tools/index.js")).toBeUndefined();
   });
 
   it("can be composed inside a custom manualChunks function", async () => {
@@ -950,6 +970,7 @@ describe("configureServer hook", () => {
     const plugin = await buildPlugin();
     const useSpy = vi.fn();
     const fakeServer = {
+      config: { base: "/" },
       middlewares: { use: useSpy },
     } as unknown as ViteDevServer;
     plugin.configureServer(fakeServer);
@@ -961,6 +982,7 @@ describe("configureServer hook", () => {
     const plugin = await buildPlugin();
     let registeredMiddleware!: (req: { url?: string }, res: unknown, next: () => void) => void;
     const fakeServer = {
+      config: { base: "/" },
       middlewares: {
         use: (fn: typeof registeredMiddleware) => {
           registeredMiddleware = fn;
@@ -981,6 +1003,7 @@ describe("configureServer hook", () => {
     const plugin = await buildPlugin({ assetsPath: "cesium" });
     let registeredMiddleware!: (req: { url?: string }, res: unknown, next: () => void) => void;
     const fakeServer = {
+      config: { base: "/" },
       middlewares: {
         use: (fn: typeof registeredMiddleware) => {
           registeredMiddleware = fn;

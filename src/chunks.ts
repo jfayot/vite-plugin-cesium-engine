@@ -1,6 +1,6 @@
 /**
- * Rollup `manualChunks` helper that isolates all `@cesium/engine` modules into
- * a dedicated chunk, keeping it independently cacheable from your app.
+ * Rollup `manualChunks` helper that isolates `@cesium/engine`, `@cesium/core`,
+ * and `@cesium/gltf` modules in a dedicated, independently cacheable chunk.
  *
  * @example
  * ```ts
@@ -21,7 +21,7 @@
  */
 export function cesiumChunks(chunkName = "cesium"): (id: string) => string | undefined {
   return (id: string) => {
-    if (id.includes("@cesium/engine") || id.includes("@cesium\\engine")) {
+    if (/(?:^|[/\\])@cesium[/\\](?:engine|core|gltf)(?:[/\\]|$)/.test(id)) {
       return chunkName;
     }
     return undefined;
