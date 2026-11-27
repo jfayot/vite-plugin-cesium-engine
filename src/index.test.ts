@@ -17,6 +17,8 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+vi.mock("vite", () => ({ loadEnv: vi.fn(() => ({})) }));
+
 // ─── Mock node:fs ─────────────────────────────────────────────────────────────
 vi.mock("node:fs", () => ({
   existsSync: vi.fn(() => true),

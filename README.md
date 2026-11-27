@@ -138,9 +138,8 @@ cesiumEngine({
 Pass an async function to fetch the token from a secrets manager, vault, or any
 async source. The callback receives the current Vite `mode` and must return a
 `string` or `Promise<string>`. It is called once at build start, after
-`configResolved` — which means sync token sources (string, map, env vars) are
-available immediately, while the callback result is ready before any module
-transforms run.
+`configResolved`, and completes before any module transforms run. All token
+sources (string, map, env vars, and callbacks) are resolved at this stage.
 
 ```ts
 cesiumEngine({
@@ -158,7 +157,7 @@ treated as no token (Cesium's built-in default is used).
 ### Auto `.env` detection
 
 When `ionToken` is not set in the plugin options, the plugin automatically reads
-your Ion token from Vite's loaded environment variables — no boilerplate needed.
+your Ion token from `.env` files and shell environment variables — no boilerplate needed.
 
 Place your token in a `.env` file at the project root:
 
@@ -184,6 +183,11 @@ The lookup order is:
 3. Nothing — Cesium's own built-in default token is used
 
 Explicit `ionToken` in the plugin options always takes priority over env vars.
+
+Files are loaded from Vite's `envDir` (the project root by default), respecting
+the current mode and Vite's `.env` file precedence. Shell variables override
+file values for the same key. Setting `envDir: false` disables file loading;
+shell variables can still supply the token.
 
 > **Note:** these variables do **not** need the `VITE_` prefix. The plugin reads
 > them server-side during the build and bakes the value in as a string literal.

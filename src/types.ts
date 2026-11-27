@@ -20,7 +20,7 @@ export type CesiumEngineOptions = {
    * `(mode) => Promise<string>` for secrets manager / vault integrations.
    *
    * When omitted, the plugin automatically checks the following environment
-   * variables (loaded by Vite from your `.env` files):
+   * variables (from `.env` files in Vite's `envDir` and the shell):
    *   - `CESIUM_ION_TOKEN_<MODE>` — e.g. `CESIUM_ION_TOKEN_PRODUCTION`
    *   - `CESIUM_ION_TOKEN`        — generic fallback for any mode
    *
