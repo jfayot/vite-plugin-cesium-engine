@@ -50,7 +50,7 @@ export type CesiumEngineOptions = {
    * CDN uses a different package layout.
    *
    * @example
-   * "https://cdn.jsdelivr.net/npm/@cesium/engine@26.2.0/Source/Widget/CesiumWidget.css"
+   * "https://cdn.jsdelivr.net/npm/@cesium/engine@26.5.0/Source/Widget/CesiumWidget.css"
    *
    * @default `${cesiumBaseUrl}/Widget/CesiumWidget.css`
    */
@@ -79,8 +79,8 @@ export type CesiumEngineOptions = {
   enginePath?: string;
 
   /**
-   * Split `@cesium/engine` into a dedicated output chunk with this name,
-   * keeping it independently cacheable from your app code.
+   * Split `@cesium/engine`, `@cesium/core`, and `@cesium/gltf` into a dedicated
+   * output chunk with this name, keeping it independently cacheable from your app.
    *
    * Equivalent to manually adding `manualChunks: cesiumChunks(chunkName)`
    * to your Rollup output options, but configured in one place.

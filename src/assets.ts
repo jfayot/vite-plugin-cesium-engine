@@ -76,13 +76,15 @@ export function registerDevServerMiddleware(
   engineRoot: string,
   assetsPath: string,
 ) {
+  const base = server.config.base;
+  const assetUrl = `${base}${assetsPath}`;
   // Map URL prefixes to their source directories. Order matters: more
   // specific prefixes must come before less specific ones.
   const mounts: Array<[string, string]> = [
-    [`/${assetsPath}/ThirdParty`, join(engineRoot, "Source/ThirdParty")],
-    [`/${assetsPath}/Assets`, join(engineRoot, "Source/Assets")],
-    [`/${assetsPath}/Widget`, join(engineRoot, "Source/Widget")],
-    [`/${assetsPath}`, join(engineRoot, "Build")],
+    [`${assetUrl}/ThirdParty`, join(engineRoot, "Source/ThirdParty")],
+    [`${assetUrl}/Assets`, join(engineRoot, "Source/Assets")],
+    [`${assetUrl}/Widget`, join(engineRoot, "Source/Widget")],
+    [assetUrl, join(engineRoot, "Build")],
   ];
 
   server.middlewares.use((req, _res, next) => {
@@ -95,8 +97,8 @@ export function registerDevServerMiddleware(
 
         if (existsSync(filePath)) {
           // Rewrite the URL so Vite's built-in static middleware finds it
-          // under the configured `fs.allow` directories.
-          req.url = `/@fs/${filePath}`;
+          // under `fs.allow`; Vite strips its base after plugin middleware.
+          req.url = `${base}@fs/${filePath}`;
           return next();
         }
       }

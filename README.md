@@ -25,9 +25,8 @@ What it does for you automatically:
 - ✅ Auto-detects `CESIUM_ION_TOKEN` / `CESIUM_ION_TOKEN_<MODE>` from `.env` files
 - ✅ Exposes `virtual:cesium` and `virtual:cesium/version` modules for typed access to build-time constants
 - ✅ Validates your Ion token format and warns about misconfigurations at startup
-- ✅ Optionally splits Cesium into its own cacheable output chunk
+- ✅ Optionally splits Cesium engine, core, and glTF modules into their own cacheable output chunk
 - ✅ Supports externally hosted or CDN-hosted Cesium assets without copying them
-- ✅ Exposes `virtual:cesium` and `virtual:cesium/version` modules for typed runtime constants
 
 ---
 
@@ -35,13 +34,16 @@ What it does for you automatically:
 
 ```bash
 # npm
-npm i -D @cesium/engine vite-plugin-cesium-engine
+npm i @cesium/engine @cesium/core
+npm i -D vite-plugin-cesium-engine
 
 # pnpm
-pnpm add -D @cesium/engine vite-plugin-cesium-engine
+pnpm add @cesium/engine @cesium/core
+pnpm add -D vite-plugin-cesium-engine
 
 # yarn
-yarn add -D @cesium/engine vite-plugin-cesium-engine
+yarn add @cesium/engine @cesium/core
+yarn add -D vite-plugin-cesium-engine
 ```
 
 ---
@@ -64,9 +66,23 @@ Then use `@cesium/engine` directly — no boilerplate, no globals:
 
 ```ts
 import { CesiumWidget } from "@cesium/engine";
+import { Cartesian3 } from "@cesium/core";
 
 const widget = new CesiumWidget(document.getElementById("cesium-container")!);
+widget.camera.setView({
+  destination: Cartesian3.fromDegrees(-75.6, 40.0, 1_500_000),
+});
 ```
+
+Since CesiumJS 1.146 (`@cesium/engine` 26.4), math, geometry, time, and utility
+types such as `Cartesian3` live in `@cesium/core`. Import them directly from
+core and declare it as a dependency when your app uses it. The compatibility
+exports from engine are deprecated and scheduled for removal in CesiumJS 1.150.
+See the [upstream migration issue](https://github.com/CesiumGS/cesium/issues/13854).
+
+The plugin continues to support older engine releases. `@cesium/core` is not a
+required peer dependency of the plugin. Apps using only core's math utilities
+do not need this plugin; asset handling and widget CSS belong to engine.
 
 `CESIUM_BASE_URL` is set via Vite's `define` mechanism — it's replaced as a compile-time constant inside Cesium's source during bundling, which is how Cesium intends it to be consumed. No `window.CESIUM_BASE_URL` script tag is injected at runtime.
 
@@ -94,7 +110,7 @@ cesiumEngine({
   // Override the @cesium/engine package directory (relative to Vite's root)
   enginePath: "../vendor/cesium-engine",
 
-  // Split @cesium/engine into its own named chunk (optional)
+  // Split Cesium engine, core, and glTF into one named chunk (optional)
   chunkName: "vendor-cesium",
 
   // Print what the plugin is doing at startup
@@ -110,7 +126,7 @@ cesiumEngine({
 | `widgetCssUrl` | `string` | `"${cesiumBaseUrl}/Widget/CesiumWidget.css"` | URL of the injected CesiumWidget stylesheet. Useful when an external CDN has a different layout. |
 | `assetsPath` | `string` | `"cesium"` | Output subfolder (relative to `build.outDir`) where static assets are copied. |
 | `enginePath` | `string` | `"node_modules/@cesium/engine"` | Package directory, resolved relative to Vite's `root`. Absolute paths are also supported. |
-| `chunkName` | `string` | `undefined` | Split `@cesium/engine` into a dedicated output chunk with this name. Omit to bundle Cesium with your app. |
+| `chunkName` | `string` | `undefined` | Split `@cesium/engine`, `@cesium/core`, and `@cesium/gltf` into a dedicated output chunk with this name. Omit to bundle Cesium with your app. |
 | `debug` | `boolean` | `false` | Log asset copy targets, resolved token, and base URL at startup. |
 
 ---
@@ -245,7 +261,7 @@ multiple Cesium versions in the same codebase.
 
 ## Splitting Cesium into its own chunk
 
-Use the `chunkName` option to isolate all `@cesium/engine` modules into a dedicated output chunk. This keeps Cesium independently cacheable — a change to your app code won't bust the Cesium bundle in the browser cache.
+Use the `chunkName` option to isolate `@cesium/engine`, `@cesium/core`, and `@cesium/gltf` modules in a dedicated output chunk. This keeps Cesium independently cacheable — a change to your app code won't bust the Cesium bundle in the browser cache.
 
 ```ts
 cesiumEngine({ chunkName: "vendor-cesium" })
@@ -256,6 +272,8 @@ That's equivalent to manually configuring `manualChunks` in your Rollup output o
 ```ts
 import { cesiumEngine, cesiumChunks } from "vite-plugin-cesium-engine";
 
+const cesiumChunk = cesiumChunks("vendor-cesium");
+
 export default defineConfig({
   plugins: [cesiumEngine()],
   build: {
@@ -263,7 +281,7 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes("three")) return "vendor-3d";
-          return cesiumChunks("vendor-cesium");
+          return cesiumChunk(id);
         },
       },
     },
@@ -305,15 +323,15 @@ Ion token handling, and virtual modules continue to work normally.
 cesiumEngine({
   assets: "external",
   cesiumBaseUrl:
-    "https://cdn.jsdelivr.net/npm/cesium@1.144.0/Build/Cesium",
+    "https://cdn.jsdelivr.net/npm/cesium@1.147.0/Build/Cesium",
   widgetCssUrl:
-    "https://cdn.jsdelivr.net/npm/@cesium/engine@26.2.0/Source/Widget/CesiumWidget.css",
+    "https://cdn.jsdelivr.net/npm/@cesium/engine@26.5.0/Source/Widget/CesiumWidget.css",
 })
 ```
 
 The full `cesium` package provides the `Assets`, `ThirdParty`, and `Workers`
 directories under one CDN base. Its version must match the installed engine;
-for example, CesiumJS 1.144 depends on `@cesium/engine` 26.2. Pin both URLs so a
+for example, CesiumJS 1.147 depends on `@cesium/engine` 26.5. Pin both URLs so a
 future CDN release cannot become incompatible with the application bundle.
 
 For a custom CDN, `cesiumBaseUrl` must contain the same runtime asset layout
@@ -362,6 +380,27 @@ pnpm dev:vanilla-ts
 pnpm dev:vanilla-ts-external
 pnpm dev:vue
 ```
+
+---
+
+## Development
+
+```bash
+pnpm test
+pnpm lint:ci
+pnpm exec tsc --noEmit
+pnpm build:all
+```
+
+The compatibility tests build against the current engine and a pinned 26.2.0
+test dependency from before the core split. They also request workers, WASM,
+assets, and CSS from a real Vite dev server under `/app/`.
+
+The root package keeps TypeScript 7's `tsc` through the `typescript-native`
+alias. ESLint, declaration generation, and `vue-tsc` use the TypeScript 6 API
+through Microsoft's `@typescript/typescript6` compatibility package because
+these tools do not yet support the TypeScript 7 API.
+See [Microsoft's side-by-side setup](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0).
 
 ---
 

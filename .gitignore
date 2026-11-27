@@ -2,3 +2,4 @@ node_modules
 dist
 lint.html
 **/lint.html
+.DS_Store
