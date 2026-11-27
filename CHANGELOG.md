@@ -1,5 +1,13 @@
 # vite-plugin-cesium-engine
 
+## 1.11.1
+
+### Patch Changes
+
+- [#244](https://github.com/jfayot/vite-plugin-cesium-engine/pull/244) [`f06d2a4`](https://github.com/jfayot/vite-plugin-cesium-engine/commit/f06d2a4f27b3213f7fb7d79be202f32b36fabe18) Thanks [@jfayot](https://github.com/jfayot)! - Load unprefixed Cesium Ion token variables from Vite's environment directory
+  and the shell. Respect mode-specific files, custom `envDir`, and explicit
+  token options without changing Vite's client environment prefix.
+
 ## 1.11.0
 
 ### Minor Changes
