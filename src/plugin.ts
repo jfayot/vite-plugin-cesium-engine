@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
-import { resolve, join } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, resolve, join } from "node:path";
 import { loadEnv, type Plugin, type ResolvedConfig } from "vite";
 import {
   RESOLVED_VIRTUAL_CESIUM_ID,
@@ -79,6 +80,15 @@ export function cesiumEngine(options: CesiumEngineOptions = {}): Plugin {
       engineRoot = enginePath
         ? resolve(cfg.root, enginePath)
         : resolve(cfg.root, "node_modules/@cesium/engine");
+
+      if (!enginePath) {
+        try {
+          const projectRequire = createRequire(join(cfg.root, "package.json"));
+          engineRoot = dirname(projectRequire.resolve("@cesium/engine/package.json"));
+        } catch {
+          // Keep the local path for the installation error below if resolution fails.
+        }
+      }
 
       if (!existsSync(engineRoot)) {
         throw new Error(

@@ -7,7 +7,6 @@ export default defineConfig({
   base: "/app/",
   plugins: [
     cesiumEngine({
-      enginePath: fileURLToPath(new URL("../../node_modules/@cesium/engine", import.meta.url)),
       ionToken: "",
     }),
   ],
